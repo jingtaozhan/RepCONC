@@ -3,7 +3,8 @@
 This is the official repo for our WSDM'22 paper, [Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval](https://arxiv.org/pdf/2110.05789.pdf). 
 
 **************************** **Updates** ****************************
-* 11/2: We released our [model checkpoints](#models-and-indexes) and [evaluation code](#retrieval).
+* 11/3: We released code for [encoding corpus](#encode-corpus).
+* 11/2: We released our [model checkpoints](#models-and-indexes) and [retrieval code](#retrieval).
 * 10/13: Our paper has been accepted to WSDM! Please check out the [preprint paper](https://arxiv.org/pdf/2110.05789.pdf).
 
 ## Quick Links
@@ -12,6 +13,7 @@ This is the official repo for our WSDM'22 paper, [Learning Discrete Representati
   - [Requirements](#requirements)
   - [Preprocess Data](#preprocess)
   - [Model Checkpoints](#models-and-indexes)
+  - [Encode Corpus](#encode-corpus)
   - [Run Retrieval](#retrieval)
   - [Citation](#citation)
   - [Related Work](#related-work)
@@ -59,18 +61,55 @@ To support REPRODUCIBILITY, we copy the RobertaTokenizer source codes from 2.x v
 
 ## Models and Indexes
 
-You can download the query encoders and indexes from our [dropbox link](https://www.dropbox.com/sh/4xqve2ixf0nrva3/AABm6Z1Ase2AC0ZpJhSrVJzGa?dl=0). After opening this link in your browser, you can see two folder, `doc` and `passage`. They correspond to MSMARCO passage ranking and document ranking. There are also three folders in either of them, `official_query_encoders`, `official_pq_index`, and `official_ivf_index`. `official_query_encoders` are the trained query encoders, `official_pq_index` are trained PQ indexes, and `official_ivf_index` are the IVF accelerated PQ indexes. Note, the `pid` in the index is actually the row number of a passage in the `collection.tsv` file instead of the official pid provided by MS MARCO. Different query encoders and indexes correspond to different compression ratios. For example, the query encoder named `m32.marcopass.query.encoder.tar.gz` means 32 bytes per doc, i.e., `768*4/32=96x` compression ratio.
+You can download the query encoders and indexes from our [dropbox link](https://www.dropbox.com/sh/4xqve2ixf0nrva3/AABm6Z1Ase2AC0ZpJhSrVJzGa?dl=0). After opening this link in your browser, you can see two folder, `doc` and `passage`. They correspond to MSMARCO passage ranking and document ranking. There are also four folders in either of them:
+* Encoders: 
+  * `--official_doc_encoders`:  The unified query/document encoder output from the first-stage training. RepCONC adopts [STAR](https://arxiv.org/pdf/2104.08051.pdf) negative sampling method in this stage. 
+  * `--official_query_encoders`: The query encoder output from the second-stage training. RepCONC adopts [ADORE](https://arxiv.org/pdf/2104.08051.pdf) negative sampling method in this stage.
+* Indexes (Note, the `pid` in the index is actually the row number of a passage in the `collection.tsv` file instead of the official pid provided by MS MARCO.): 
+  * `--official_pq_index`: trained PQ indexes.  
+  * `--official_ivf_index`:  The query encoder trained in the second-stage training process. The script uses it to set the centroid embeddings. If it is not provided, the centroid embeddings are set according the `--doc_encoder_dir` model. 
 
-We provide several scripts to help you download these data. Please run
+Different query encoders and indexes correspond to different compression ratios. For example, the query encoder named `m32.marcopass.query.encoder.tar.gz` means 32 bytes per doc, i.e., `768*4/32=96x` compression ratio.
+
+We provide several scripts to help you download these data.
 ```bash
 sh ./cmds/download_query_encoder.sh
+sh ./cmds/download_doc_encoder.sh
+sh ./cmds/download_index.sh
+```
+## Encode Corpus
+
+In this section, we provide commands about how to encode the corpus to compact indexes with our provided encoders. 
+Note, you can skip this section and download the open-sourced indexes by running: 
+```bash
 sh ./cmds/download_index.sh
 ```
 
+To encode the corpus:
+
+First, you need to [preprocess the dataset](#preprocess).
+
+Second, please download the [open-sourced query and document encoders](#models-and-indexes). Here are two scripts to help you download them.
+```bash
+sh ./cmds/download_query_encoder.sh
+sh ./cmds/download_doc_encoder.sh
+```
+
+Finally, run `run_encode.py` to encode corpus. You can refer to the example commands in `cmds/run_encode_corpus.sh`.
+Arguments for `run_encode.py` script are as follows,
+* `--preprocess_dir`: preprocess dir
+    * `./data/passage/preprocess`: default dir for passage preprocessing.
+    * `./data/doc/preprocess`: default dir for document preprocessing.
+* `--doc_encoder_dir`: The unified query/document encoder trained in the first-stage training process. The script uses it to generate Index Assignments for all passages/documents.  
+* `--query_encoder_dir`:  The query encoder trained in the second-stage training process. The script uses it to set the centroid embeddings. If it is not provided, the centroid embeddings are set according the `--doc_encoder_dir` model. 
+* `--output_path`:  Output index path.
+* `--max_doc_length`: Max passage/document length. Set it to 256 for passage and 512 for document, respectively.
+* `--batch_size`: Encoding batch size.
+
+
 ## Retrieval
 
-In this section, we provide commands about how to reproduce the retrieval results with our open-sourced indexes and query encoders. Note, please [preprocess the data](#preprocess) and [download the model checkpoints](#models-and-indexes) first!
-
+In this section, we provide commands about how to reproduce the retrieval results with our open-sourced indexes and query encoders. 
 Run the following command to evaluate the retrieval results on dev set.
 ```bash
 sh ./cmds/run_retrieval.sh
