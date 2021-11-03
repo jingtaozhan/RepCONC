@@ -57,17 +57,17 @@ python preprocess.py --data_type doc; python preprocess.py --data_type passage
 It will create two directories, i.e., `./data/passage/preprocess` and `./data/doc/preprocess`. We map the original qid/pid to new ids, the row numbers in the file. The mapping is saved to `pid2offset.pickle` and `qid2offset.pickle`, and new qrel files (`train/dev/test-qrel.tsv`) are generated. The passages and queries are tokenized and saved in the numpy memmap file. 
 
 Note: RepCONC, as long as most of our [prior models](#related-work), utilizes Transformers 2.x version to tokenize text. However, when Transformers library updates to 3.x or 4.x versions, the RobertaTokenizer behaves differently. 
-To support REPRODUCIBILITY, we copy the RobertaTokenizer source codes from 2.x version to [star_tokenizer.py](https://github.com/jingtaozhan/JPQ/blob/main/star_tokenizer.py). During preprocessing, we use `from star_tokenizer import RobertaTokenizer` instead of `from transformers import RobertaTokenizer`. It is also **necessary** for you to do this if you use our trained RepCONC models on other datasets. 
+To support REPRODUCIBILITY, we copy the RobertaTokenizer source codes from 2.x version to [star_tokenizer.py](star_tokenizer.py). During preprocessing, we use `from star_tokenizer import RobertaTokenizer` instead of `from transformers import RobertaTokenizer`. It is also **necessary** for you to do this if you use our trained RepCONC models on other datasets. 
 
 ## Models and Indexes
 
 You can download the query encoders and indexes from our [dropbox link](https://www.dropbox.com/sh/4xqve2ixf0nrva3/AABm6Z1Ase2AC0ZpJhSrVJzGa?dl=0). After opening this link in your browser, you can see two folder, `doc` and `passage`. They correspond to MSMARCO passage ranking and document ranking. There are also four folders in either of them:
 * Encoders: 
-  * `--official_doc_encoders`:  The unified query/document encoder output from the first-stage training. RepCONC adopts [STAR](https://arxiv.org/pdf/2104.08051.pdf) negative sampling method in this stage. 
-  * `--official_query_encoders`: The query encoder output from the second-stage training. RepCONC adopts [ADORE](https://arxiv.org/pdf/2104.08051.pdf) negative sampling method in this stage.
+  * `official_doc_encoders`:  The unified query/document encoder output from the first-stage training. RepCONC adopts [STAR](https://arxiv.org/pdf/2104.08051.pdf) negative sampling method in this stage. 
+  * `official_query_encoders`: The query encoder output from the second-stage training. RepCONC adopts [ADORE](https://arxiv.org/pdf/2104.08051.pdf) negative sampling method in this stage.
 * Indexes (Note, the `pid` in the index is actually the row number of a passage in the `collection.tsv` file instead of the official pid provided by MS MARCO.): 
-  * `--official_pq_index`: trained PQ indexes.  
-  * `--official_ivf_index`:  The query encoder trained in the second-stage training process. The script uses it to set the centroid embeddings. If it is not provided, the centroid embeddings are set according the `--doc_encoder_dir` model. 
+  * `official_pq_index`: PQ indexes.   
+  * `official_ivf_index`: IVF accelerated PQ indexes. The number of inverted lists is set to 5000. 
 
 Different query encoders and indexes correspond to different compression ratios. For example, the query encoder named `m32.marcopass.query.encoder.tar.gz` means 32 bytes per doc, i.e., `768*4/32=96x` compression ratio.
 
@@ -95,8 +95,8 @@ sh ./cmds/download_query_encoder.sh
 sh ./cmds/download_doc_encoder.sh
 ```
 
-Finally, run `run_encode.py` to encode corpus. You can refer to the example commands in `cmds/run_encode_corpus.sh`.
-Arguments for `run_encode.py` script are as follows,
+Finally, run [run_encode.py](run_encode.py) to encode corpus. You can refer to the example commands in [cmds/run_encode_corpus.sh](cmds/run_encode_corpus.sh).
+Arguments for [run_encode.py](run_encode.py) script are as follows,
 * `--preprocess_dir`: preprocess dir
     * `./data/passage/preprocess`: default dir for passage preprocessing.
     * `./data/doc/preprocess`: default dir for document preprocessing.
@@ -118,7 +118,7 @@ or this command to evaluate the ivf accelerated search results:
 ```bash
 sh ./cmds/run_ivf_accelerate_retrieval.sh
 ```
-Both of them will call `./run_retrieval.py` to retrieve candidates.
+Both of them will call [run_retrieve.py](run_retrieve.py) to retrieve candidates.
 Arguments for this evaluation script are as follows,
 * `--preprocess_dir`: preprocess dir
     * `./data/passage/preprocess`: default dir for passage preprocessing.
@@ -132,7 +132,7 @@ Arguments for this evaluation script are as follows,
 * `--output_path`:  Output ranking file path, formatted following msmarco guideline (qid\tpid\trank).
 * `--max_query_length`: Max query length, default: 32.
 * `--batch_size`: Encoding and retrieval batch size at each iteration.
-* `--topk`: Retrieval topk passages/documents.
+* `--topk`: Retrieve topk passages/documents.
 * `--gpu_search`: Whether to use gpu for embedding search.
 * `--nprobe`: How many inverted lists to probe. This value shoule lie in [1, number of inverted lists].
  
@@ -149,8 +149,8 @@ If you find this repo useful, please consider citing our work:
 
 ## Related Work
 
-* **CIKM 2021: [Jointly Optimizing Query Encoder and Product Quantization to Improve Retrieval Performance](https://arxiv.org/abs/2108.00644)\[[code](https://github.com/jingtaozhan/JPQ)\]: It presents JPQ and greatly improves the efficiency of Dense Retrieval. RepCONC utilizes JPQ for second-stage training.**
+* **CIKM 2021: [Jointly Optimizing Query Encoder and Product Quantization to Improve Retrieval Performance](https://arxiv.org/abs/2108.00644) \[[code](https://github.com/jingtaozhan/JPQ)\]: It presents JPQ and greatly improves the efficiency of Dense Retrieval. RepCONC utilizes JPQ for second-stage training.**
 
-* **SIGIR 2021: [Optimizing Dense Retrieval Model Training with Hard Negatives](https://arxiv.org/abs/2104.08051)\[[code](https://github.com/jingtaozhan/DRhard)\]: It provides theoretical analysis on different negative sampling strategies and greatly improves the effectiveness of Dense Retrieval with hard negative sampling. The proposed negative sampling methods are adopted by RepCONC.**
+* **SIGIR 2021: [Optimizing Dense Retrieval Model Training with Hard Negatives](https://arxiv.org/abs/2104.08051) \[[code](https://github.com/jingtaozhan/DRhard)\]: It provides theoretical analysis on different negative sampling strategies and greatly improves the effectiveness of Dense Retrieval with hard negative sampling. The proposed negative sampling methods are adopted by RepCONC.**
 
-* **ARXIV 2020: [RepBERT: Contextualized Text Embeddings for First-Stage Retrieval.](https://arxiv.org/pdf/2006.15498.pdf)\[[code](https://github.com/jingtaozhan/RepBERT-Index)\]: It is one of the pioneer studies about Dense Retrieval.**
+* **ARXIV 2020: [RepBERT: Contextualized Text Embeddings for First-Stage Retrieval](https://arxiv.org/pdf/2006.15498.pdf) \[[code](https://github.com/jingtaozhan/RepBERT-Index)\]: It is one of the pioneer studies about Dense Retrieval.**
