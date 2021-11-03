@@ -1,6 +1,5 @@
 import sys
 import os
-sys.path += ['./']
 import torch
 from torch import nn
 from transformers.models.roberta.modeling_roberta import RobertaPreTrainedModel
@@ -131,17 +130,6 @@ class QuantDot_STAR(QuantDot):
         loss = rank_loss + mse_loss * self.config.mse_weight
     
         return (loss, rank_loss.detach(), mse_loss.detach())
-
-
-class QuantDot_Inference(QuantDot):
-    def forward(self, input_ids, attention_mask, is_doc):
-        embeds =  self.rotate_encode(input_ids, attention_mask)
-        if not is_doc:
-            return embeds
-        embeds = embeds.reshape(len(embeds), self.config.MCQ_M, 1, -1) # bs, M, 1, subdim
-        distances = ((embeds - self.centroids.unsqueeze(0))**2).sum(-1) # bs, M, K
-        codes = torch.argmin(distances, dim=-1) # bs, M
-        return codes
 
 
 @torch.no_grad()

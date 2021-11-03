@@ -1,5 +1,4 @@
 import sys
-sys.path += ["./"]
 import os
 import math
 import json

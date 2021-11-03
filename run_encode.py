@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 from transformers import RobertaConfig
-from model.modeling import QuantDot, QuantDot, QuantDot_Inference
+from model.modeling import QuantDot, QuantDot
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.sampler import SequentialSampler
 

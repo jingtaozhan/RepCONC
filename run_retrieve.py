@@ -21,14 +21,6 @@ formatter = logging.Formatter('%(asctime)s-%(name)s-%(levelname)s- %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-def load_index(index_path, use_cuda, faiss_gpu_index):
-    index = faiss.read_index(index_path)
-    if use_cuda:
-        res = faiss.StandardGpuResources()
-        res.setTempMemory(1024*1024*1024)
-        index = faiss.index_cpu_to_gpu(res, faiss_gpu_index, index)
-    return index
-
 
 def query_inference(model, index, args):
     query_dataset = SequenceDataset(
