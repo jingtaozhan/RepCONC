@@ -3,7 +3,7 @@
 This is the official repo for our WSDM'22 paper, [Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval](https://arxiv.org/pdf/2110.05789.pdf). 
 
 **************************** **Updates** ****************************
-* 11/3: We released code for [encoding corpus](#encode-corpus).
+* 11/3: We released code for [encoding corpus](#encode-corpus) and [IVF acceleration](#build-ivf-index).
 * 11/2: We released our [model checkpoints](#models-and-indexes) and [retrieval code](#retrieval).
 * 10/13: Our paper has been accepted to WSDM! Please check out the [preprint paper](https://arxiv.org/pdf/2110.05789.pdf).
 
@@ -12,9 +12,11 @@ This is the official repo for our WSDM'22 paper, [Learning Discrete Representati
   - [Quick Tour](#quick-tour)
   - [Requirements](#requirements)
   - [Preprocess Data](#preprocess)
-  - [Model Checkpoints](#models-and-indexes)
-  - [Encode Corpus](#encode-corpus)
-  - [Run Retrieval](#retrieval)
+  - [Evaluate Open-sourced Checkpoints](#evaluate-open-sourced-checkpoints)
+    - [Model Checkpoints](#models-and-indexes)
+    - [Encode Corpus](#encode-corpus)
+    - [IVF Accelerated Index](#build-ivf-index)
+    - [Run Retrieval](#retrieval)
   - [Citation](#citation)
   - [Related Work](#related-work)
 
@@ -59,7 +61,8 @@ It will create two directories, i.e., `./data/passage/preprocess` and `./data/do
 Note: RepCONC, as long as most of our [prior models](#related-work), utilizes Transformers 2.x version to tokenize text. However, when Transformers library updates to 3.x or 4.x versions, the RobertaTokenizer behaves differently. 
 To support REPRODUCIBILITY, we copy the RobertaTokenizer source codes from 2.x version to [star_tokenizer.py](star_tokenizer.py). During preprocessing, we use `from star_tokenizer import RobertaTokenizer` instead of `from transformers import RobertaTokenizer`. It is also **necessary** for you to do this if you use our trained RepCONC models on other datasets. 
 
-## Models and Indexes
+## Evaluate Open-sourced Checkpoints
+### Models and Indexes
 
 You can download the query encoders and indexes from our [dropbox link](https://www.dropbox.com/sh/4xqve2ixf0nrva3/AABm6Z1Ase2AC0ZpJhSrVJzGa?dl=0). After opening this link in your browser, you can see two folder, `doc` and `passage`. They correspond to MSMARCO passage ranking and document ranking. There are also four folders in either of them:
 * Encoders: 
@@ -77,10 +80,10 @@ sh ./cmds/download_query_encoder.sh
 sh ./cmds/download_doc_encoder.sh
 sh ./cmds/download_index.sh
 ```
-## Encode Corpus
+### Encode Corpus
 
 In this section, we provide commands about how to encode the corpus to compact indexes with our provided encoders. 
-Note, you can skip this section and download the open-sourced indexes by running: 
+Note, you can skip this section and download the open-sourced indexes by running (only once): 
 ```bash
 sh ./cmds/download_index.sh
 ```
@@ -106,8 +109,23 @@ Arguments for [run_encode.py](run_encode.py) script are as follows,
 * `--max_doc_length`: Max passage/document length. Set it to 256 for passage and 512 for document, respectively.
 * `--batch_size`: Encoding batch size.
 
+### Build IVF Index
+In this section, we provide commands about how to use IVF to accelerate search. The IVF index is built upon the PQ index output by [run_encode.py](run_encode.py).
+Note, you can skip this section and download the open-sourced indexes by running (only once): 
+```bash
+sh ./cmds/download_index.sh
+```
 
-## Retrieval
+We provide an example command in [run_build_ivf_index.sh](cmds/run_build_ivf_index.sh). It builds an IVFPQ index for MS MARCO Passage Ranking task. It calls [build_ivf_index.py](build_ivf_index.py). Arguments for this script are as follows,
+* `--input_index_path`: The path for index output by [run_encode.py](run_encode.py).
+* `--output_index_path`: The output index path.
+* `--nlist`: The number of inverted lists. Large nlist improves accuracy at the cost of computation overhead.
+* `--nprobe`: The number of searched lists during online retrieval. The ideal IVF speedup ratio equals to nlist/nprobe.
+* `--threads`: The number of threads.
+* `--by_residual`: Whether to combine IVF and PQ embeds. Default: False.
+
+
+### Retrieval
 
 In this section, we provide commands about how to reproduce the retrieval results with our open-sourced indexes and query encoders. 
 Run the following command to evaluate the retrieval results on dev set.
