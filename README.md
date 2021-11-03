@@ -5,7 +5,7 @@ This is the official repo for our WSDM'22 paper, [Learning Discrete Representati
 **************************** **Updates** ****************************
 * 11/3: We released code for [encoding corpus](#encode-corpus) and [IVF acceleration](#build-ivf-index).
 * 11/2: We released our [model checkpoints](#models-and-indexes) and [retrieval code](#retrieval).
-* 10/13: Our paper has been accepted to WSDM! Please check out the [preprint paper](https://arxiv.org/pdf/2110.05789.pdf).
+* 10/13: Our paper has been accepted by WSDM! Please check out the [preprint paper](https://arxiv.org/pdf/2110.05789.pdf).
 
 ## Quick Links
 
@@ -15,7 +15,7 @@ This is the official repo for our WSDM'22 paper, [Learning Discrete Representati
   - [Evaluate Open-sourced Checkpoints](#evaluate-open-sourced-checkpoints)
     - [Model Checkpoints](#models-and-indexes)
     - [Encode Corpus](#encode-corpus)
-    - [IVF Accelerated Index](#build-ivf-index)
+    - [Build IVF Index](#build-ivf-index)
     - [Run Retrieval](#retrieval)
   - [Citation](#citation)
   - [Related Work](#related-work)
