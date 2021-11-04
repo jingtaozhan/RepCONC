@@ -1,3 +1,5 @@
+set -e 
+
 root_dir="./data"
 
 # download for passage dataset

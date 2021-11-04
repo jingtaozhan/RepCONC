@@ -1,3 +1,5 @@
+set -e 
+
 dataset="passage"
 batch_size=128
 m=48

@@ -1,4 +1,4 @@
-
+set -e 
 
 nprobe=500
 echo "Parameters: nprobe is set to $nprobe"

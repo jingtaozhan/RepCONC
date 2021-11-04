@@ -1,3 +1,5 @@
+set -e 
+
 dataset="passage"
 m=48
 nlist=5000

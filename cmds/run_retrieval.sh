@@ -1,3 +1,5 @@
+set -e 
+
 mode="dev"
 echo "Evaluating on msmarco dev set"
 

@@ -1,3 +1,5 @@
+set -e 
+
 mkdir data
 mkdir data/passage
 mkdir data/passage/dataset
