@@ -44,16 +44,17 @@ def query_inference(model, index, args):
     logger.info("  Batch size = %d", batch_size)
     model.eval()
 
-    all_search_results = []
+    all_search_results_pids, all_search_results_scores = [], []
     for inputs, ids in tqdm(dataloader):
         for k, v in inputs.items():
             if isinstance(v, torch.Tensor):
                 inputs[k] = v.to(args.device)
         with torch.no_grad():
             query_embeds = model(**inputs).detach().cpu().numpy()
-            batch_results = index.search(query_embeds, args.topk)[1]
-            all_search_results.extend(batch_results.tolist())
-    return all_search_results
+            batch_results_scores, batch_results_pids = index.search(query_embeds, args.topk)
+            all_search_results_pids.extend(batch_results_pids.tolist())
+            all_search_results_scores.extend(batch_results_scores.tolist())
+    return all_search_results_scores, all_search_results_pids
 
 
 def main():
@@ -102,14 +103,19 @@ def main():
         res.setTempMemory(1024*1024*1024)
         index = faiss.index_cpu_to_gpu(res, 0, index)
 
-    all_search_results = query_inference(model, index, args)
+    all_search_results_scores, all_search_results_pids = query_inference(model, index, args)
 
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     with open(args.output_path, 'w') as outputfile:
-        for qid, pids in enumerate(all_search_results):
-            for idx, pid in enumerate(pids):
+        for qid, (scores, pids) in enumerate(zip(all_search_results_scores, all_search_results_pids)):
+            for idx, (score, pid) in enumerate(zip(scores, pids)):
                 rank = idx+1
-                outputfile.write(f"{qid}\t{pid}\t{rank}\n")
+                if args.mode == "dev":
+                    outputfile.write(f"{qid}\t{pid}\t{rank}\n")
+                else:
+                    assert args.mode == "test" # TREC Test
+                    index_name = os.path.basename(args.index_path)
+                    outputfile.write(f"{qid} Q0 {pid} {rank} {score} RepCONC-{index_name}-np{index.nprobe}\n")
 
 
 if __name__ == "__main__":
