@@ -3,6 +3,7 @@
 This is the official repo for our WSDM'22 paper, [Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval](https://arxiv.org/pdf/2110.05789.pdf). 
 
 **************************** **Updates** ****************************
+* 11/13: We released code to evaluate [zero-shot retrieval performance](#zero-shot-retrieval) of RepCONC and used BEIR benchmark as an example.
 * 11/5: We released [ranking results](#ranking-results) for queries from MS MARCO development set and TREC 2019 Deep Learning Track.
 * 11/3: We released code for [encoding corpus](#encode-corpus) and [IVF acceleration](#build-ivf-index).
 * 11/2: We released our [model checkpoints](#models-and-indexes) and [retrieval code](#retrieval).
@@ -19,6 +20,7 @@ This is the official repo for our WSDM'22 paper, [Learning Discrete Representati
     - [Encode Corpus](#encode-corpus)
     - [Build IVF Index](#build-ivf-index)
     - [Run Retrieval](#retrieval)
+    - [Zero-shot Retrieval (BEIR)](#zero-shot-retrieval)
   - [Citation](#citation)
   - [Related Work](#related-work)
 
@@ -167,6 +169,39 @@ Arguments for this evaluation script are as follows,
 * `--gpu_search`: Whether to use gpu for embedding search.
 * `--nprobe`: How many inverted lists to probe. This value shoule lie in [1, number of inverted lists].
  
+
+### Zero-shot Retrieval 
+
+This section shows how to use RepCONC for other datasets in a zero-shot fashion.
+
+Since RepCONC is an extension of [JPQ](https://github.com/jingtaozhan/JPQ), the zero-shot process is exactly the same. Here we use JPQ package and please run the following command to install it.
+```bash
+pip install git+https://github.com/jingtaozhan/JPQ
+```
+
+We use [BEIR](https://github.com/UKPLab/beir) as an example because it involves a wide range of datasets. For your own dataset, you only need to format it in the same way as BEIR and you are good to go.
+
+Now, we show how to use JPQ for TREC-Covid dataset. Run
+```bash
+sh ./cmds/run_eval_beir.sh trec-covid
+```
+You can also replace trec-covid with other datasets, such as nq. 
+The script calls [jpq.eval_beir](https://github.com/jingtaozhan/JPQ/blob/main/jpq/eval_beir.py). Arguments are as follows,
+* `--dataset`: Dataset name in BEIR .  
+* `--beir_data_root`: Where to save BEIR dataset.
+* `--query_encoder`: Path to JPQ query encoder.
+* `--doc_encoder`: Path to JPQ document encoder.
+* `--split`: test/dev/train.
+* `--encode_batch_size`: Batch size, default: 64.
+* `--output_index_path`: Optional, where to save the compact index. If the pointed file exists, it will be loaded to save the corpus-encoding time.
+* `--output_ranking_path`: Optional, where to save the retrieval results.
+
+Here are the NDCG@10 on several datasets when M=48, i.e., 64x compression ratio:
+Dataset  | TREC-COVID | NFCorpus | NQ | HotpotQA | FiQA-2018 | ArguAna | Touche-2020 | Quora | DBPedia | SCIDOCS | FEVER | Climate-FEVER | SciFact	
+:----:|:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: 
+RepCONC (64x Compression) | 0.684 | 0.266 | 0.440 | 0.425 | 0.273 | 0.420 | 0.210 | 0.850 | 0.293 | 0.120 | 0.637 | 0.205 | 0.509
+
+
 ## Citation
 If you find this repo useful, please consider citing our work:
 ```
