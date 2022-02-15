@@ -83,7 +83,9 @@ def main():
         " will be replaced and the ranking effectiveness should be better.")
     parser.add_argument("--max_doc_length", type=int, default=512)
     parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--threads", type=int, default=1)
     args = parser.parse_args()
+    faiss.omp_set_num_threads(args.threads)
 
     args.device = torch.device("cuda")
     args.n_gpu = torch.cuda.device_count()
