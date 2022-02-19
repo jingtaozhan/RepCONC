@@ -24,7 +24,7 @@ for dataset in "passage" "doc"; do
             query_encoder_path="./data/${dataset}/official_query_encoders/m${m}.marcodoc.query.encoder"
         fi
         output_path=./data/$dataset/test_results/${mode}-ivf/run.${mode}.m${m}.np${nprobe}.tsv
-        python ./run_retrieve.py \
+        python -m repconc.run_retrieve.py \
             --preprocess_dir ./data/${dataset}/preprocess \
             --index_path $index_path \
             --mode $mode \

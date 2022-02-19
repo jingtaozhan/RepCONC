@@ -1,5 +1,3 @@
-import sys
-sys.path.append('./')
 import os
 import re
 import json
@@ -10,7 +8,7 @@ import argparse
 import subprocess
 import numpy as np
 from tqdm import tqdm
-from dataset import load_rel, load_rank
+from repconc.dataset import load_rel, load_rank
 
 
 if __name__ == "__main__":

@@ -7,11 +7,11 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 from transformers import RobertaConfig
-from modeling import QuantDot
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.sampler import SequentialSampler
 
-from dataset import TextTokenIdsCache, SequenceDataset, get_collate_function
+from repconc.model import QuantDot
+from repconc.dataset import TextTokenIdsCache, SequenceDataset, get_collate_function
 
 logger = logging.Logger(__name__, level=logging.INFO)
 handler = logging.StreamHandler()

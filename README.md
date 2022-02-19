@@ -56,7 +56,7 @@ transformers == 4.3.3
 faiss-gpu == 1.7.1
 boto3
 ```
-We reuse many scripts of [JPQ](https://github.com/jingtaozhan/JPQ) library. Run the following installation command
+We reuse many scripts of [JPQ](https://github.com/jingtaozhan/JPQ) library. Install it with
 ```bash
 pip install git+https://github.com/jingtaozhan/JPQ
 ```
@@ -111,8 +111,8 @@ sh ./cmds/download_query_encoder.sh
 sh ./cmds/download_doc_encoder.sh
 ```
 
-Finally, run [run_encode.py](run_encode.py) to encode corpus. You can refer to the example commands in [cmds/run_encode_corpus.sh](cmds/run_encode_corpus.sh).
-Arguments for [run_encode.py](run_encode.py) script are as follows,
+Finally, run [run_encode.py](repconc/run_encode.py) to encode corpus. You can refer to the example commands in [cmds/run_encode_corpus.sh](cmds/run_encode_corpus.sh).
+Arguments for [run_encode.py](repconc/run_encode.py) script are as follows,
 * `--preprocess_dir`: preprocess dir
     * `./data/passage/preprocess`: default dir for passage preprocessing.
     * `./data/doc/preprocess`: default dir for document preprocessing.
@@ -123,14 +123,14 @@ Arguments for [run_encode.py](run_encode.py) script are as follows,
 * `--batch_size`: Encoding batch size.
 
 ### Build IVF Index
-In this section, we provide commands about how to use IVF to accelerate search. The IVF index is built upon the PQ index output by [run_encode.py](run_encode.py).
+In this section, we provide commands about how to use IVF to accelerate search. The IVF index is built upon the PQ index output by [run_encode.py](repconc/run_encode.py).
 Note, you can skip this section and download the open-sourced indexes by running (only once): 
 ```bash
 sh ./cmds/download_index.sh
 ```
 
-We provide an example command in [run_build_ivf_index.sh](cmds/run_build_ivf_index.sh). It builds an IVFPQ index for MS MARCO Passage Ranking task. It calls [build_ivf_index.py](build_ivf_index.py). Arguments for this script are as follows,
-* `--input_index_path`: The path for index output by [run_encode.py](run_encode.py).
+We provide an example command in [run_build_ivf_index.sh](cmds/run_build_ivf_index.sh). It builds an IVFPQ index for MS MARCO Passage Ranking task. It calls [build_ivf_index.py](repconc/build_ivf_index.py). Arguments for this script are as follows,
+* `--input_index_path`: The path for index output by [run_encode.py](repconc/run_encode.py).
 * `--output_index_path`: The output index path.
 * `--nlist`: The number of inverted lists. Large nlist improves accuracy at the cost of computation overhead.
 * `--nprobe`: The number of searched lists during online retrieval. The ideal IVF speedup ratio equals to nlist/nprobe.
@@ -153,7 +153,7 @@ or this command to evaluate the ivf accelerated search results:
 ```bash
 sh ./cmds/run_ivf_accelerate_retrieval.sh
 ```
-Both of them will call [run_retrieve.py](run_retrieve.py) to retrieve candidates.
+Both of them will call [run_retrieve.py](repconc/run_retrieve.py) to retrieve candidates.
 Arguments for this evaluation script are as follows,
 * `--preprocess_dir`: preprocess dir
     * `./data/passage/preprocess`: default dir for passage preprocessing.
@@ -202,7 +202,7 @@ RepCONC (64x Compression) | 0.684 | 0.266 | 0.440 | 0.425 | 0.273 | 0.420 | 0.21
 
 RepCONC is initialized by [STAR](https://github.com/jingtaozhan/DRhard). STAR trained on passage ranking is available [here](https://drive.google.com/drive/folders/1bJw8P15cFiV239mTgFQxVilXMWqzqXUU?usp=sharing). STAR trained on document ranking is available [here](https://drive.google.com/drive/folders/18GrqZxeiYFxeMfSs97UxkVHwIhZPVXTc?usp=sharing). 
 
-First, use STAR to encode the corpus and run OPQ to initialize the index. For example, on passage ranking task, please run:
+First, use STAR to encode the corpus and run OPQ to initialize the index. For example, on document ranking task, for 48 sub-vectors per document, please run:
 ```bash
 dataset="doc" # or "passage" 
 if [ $dataset = "passage" ]; then max_doc_length=256 else max_doc_length=512 ; fi
@@ -214,7 +214,7 @@ M=48; python -m jpq.run_init \
   --subvector_num $M
 ```
 
-Next, mine hard negatives. Retrieve top passages for training queries (passage ranking task) using:
+Next, mine hard negatives. Retrieve document passages for training queries using:
 ```bash
 dataset="doc" # or "passage"
 M=48; python -m jpq.run_retrieval \
@@ -228,24 +228,24 @@ M=48; python -m jpq.run_retrieval \
       --topk 210 \
       --gpu_search
 ```
-To validate the quality of retrieved passages, use the following command to evaluate MRR@10. You should get about 0.291 metric score.
+To validate the quality of retrieved passages, use the following command to evaluate MRR. You should get about 0.35-0.36 metric score.
 ```bash
 M=48
 dataset="doc" # or "passage"
-if [ $dataset = "passage" ]; then trunc=10 else trunc=100 ; fi
+if [ $dataset = "passage" ]; then trunc=10 else trunc="doc" ; fi
 python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$dataset/init/m$M.train.rank.tsv $trunc
 ```
 We use top-200 irrelevant passages as hard negatives.
 ```bash
 dataset="doc" # or "passage"
-M=48; python ./gen_hardnegs.py \
+M=48; python -m repconc.gen_hardnegs.py \
       --rank ./data/$dataset/init/m48.train.rank.tsv \
       --qrel ./data/$dataset/preprocess/train-qrel.tsv \
       --top 200 \
       --output ./data/$dataset/init/m48.hardneg.json
 ```
 
-Third, use constrained clustering technique for joint optimization
+Third, use constrained clustering technique to obtain supervised Index Assignments.
 ```bash
 M=48
 dataset="doc" # or "document"
@@ -254,7 +254,7 @@ then
   max_doc_length=110 
   batch=1024
   multibatch_per_forward=6
-  num_train_epochs=8
+  num_train_epochs=12
 else 
   max_doc_length=512 
   batch=256
@@ -262,7 +262,7 @@ else
   num_train_epochs=20
 fi
 train_root="./data/$dataset/train/m48"
-python ./run_train.py \
+python -m repconc.run_train.py \
       --learning_rate 5e-6 \
       --centroid_lr 2e-4 \
       --lr_scheduler_type constant \
@@ -273,9 +273,9 @@ python ./run_train.py \
       --label_path ./data/$dataset/preprocess/train-qrel.tsv \
       --MCQ_M $M \
       --MCQ_K 256 \
-      --opq_path ./data//$dataset/init/OPQ$M,IVF1,PQ$Mx8.index \
-      --hardneg_path ./data//$dataset/init/m$M.hardneg.json \
-      --init_model_path ./data//$dataset/star \
+      --opq_path ./data/$dataset/init/OPQ$M,IVF1,PQ$Mx8.index \
+      --hardneg_path ./data/$dataset/init/m$M.hardneg.json \
+      --init_model_path ./data/$dataset/star \
       --multibatch_per_forward 6 \
       --per_device_train_batch_size $batch \
       --fp16 \
@@ -285,23 +285,23 @@ python ./run_train.py \
       --sk_epsilon 0.05 \
       --mse_weight 0.05 
 ```
-Hyper-parameters are different for different `M` values. Please refer to our paper for detailed settings.
+Hyper-parameters are different for different `M` values. Please refer to our paper for settings associated to other `M` values.
 Models are saved per epoch. You can evaluate the checkpoint with 
 ```bash
-ckpt=XXXX # the training step, e.g., 3444
+ckpt=XXXX # the training step corresponding to the saved checkpoint
 M=48
 dataset="doc" # or "passage"
 if [ $dataset = "passage" ]; then max_doc_length=256 ; else max_doc_length=512 ; fi
 echo max_doc_length: $max_doc_length
 train_root="./data/$dataset/train/m48"
-python ./run_encode.py \
+python -m repconc.run_encode.py \
     --preprocess_dir ./data/$dataset/preprocess \
     --doc_encoder_dir $train_root/models/checkpoint-$ckpt \
     --output_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
     --batch_size 128 \
     --max_doc_length $max_doc_length
 for mode in "dev" "test"; do 
-python ./run_retrieve.py \
+python -m repconc.run_retrieve.py \
     --preprocess_dir ./data/$dataset/preprocess \
     --index_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
     --mode $mode \
@@ -322,7 +322,7 @@ M=48
 dataset="doc" # or "passage"
 ckpt=xxxx # the initialized RepCONC model checkpoint. Select one with the best dev performance.
 train_root="./data/$dataset/train/m48"
-python run_2nd_train.py \
+python -m repconc.run_2nd_train.py \
     --preprocess_dir ./data/$dataset/preprocess \
     --model_save_dir $train_root/2nd_models \
     --log_dir $train_root/2nd_log \
@@ -337,10 +337,10 @@ You can evaluate the checkpoint with
 ```bash
 M=48
 dataset="doc" # or "doc"
-epoch=1 # Usually model at 4-th epoch is the best
+epoch=X # Usually model at 4-th epoch is the best
 train_root="./data/$dataset/train/m48"
 for mode in "dev" "test"; do 
-python ./run_retrieve.py \
+python -m repconc.run_retrieve.py \
     --preprocess_dir ./data/$dataset/preprocess \
     --index_path $train_root/2nd_models/epoch-$epoch/index \
     --mode $mode \
@@ -350,7 +350,7 @@ python ./run_retrieve.py \
     --nprobe 1 \
     --gpu_search
 done
-if [ $dataset = "passage" ]; then trunc=10 ; else trunc=100 ; fi
+if [ $dataset = "passage" ]; then trunc=10 ; else trunc="doc" ; fi
 python ./msmarco_eval.py ./data/$dataset/preprocess/dev-qrel.tsv $train_root/2nd_evaluate/epoch-$epoch/m$M.dev.rank $trunc
 ./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/2nd_evaluate/epoch-$epoch/m$M.test.rank
 ```

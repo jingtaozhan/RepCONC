@@ -8,7 +8,7 @@ input_index_path="./data/${dataset}/run_encode/m${m}-l1.marcopass.ivfpq.index"
 output_index_path="./data/${dataset}/build_ivf/m${m}-l${nlist}.marcopass.ivfpq.index"
 
 # build IVF index
-python ./build_ivf_index.py \
+python -m repconc.build_ivf_index.py \
     --input_index_path $input_index_path \
     --output_index_path $output_index_path \
     --nlist $nlist \
@@ -21,7 +21,7 @@ exit # delete it if you want to evaluate the output index
 mode="dev"
 query_encoder_path="./data/${dataset}/official_query_encoders/m${m}.marcopass.query.encoder"
 output_rank_path="./data/${dataset}/build_ivf/run.${mode}.m${m}.np${nprobe}.tsv"
-python ./run_retrieve.py \
+python -m repconc.run_retrieve.py \
     --preprocess_dir ./data/${dataset}/preprocess \
     --index_path $output_index_path \
     --mode $mode \

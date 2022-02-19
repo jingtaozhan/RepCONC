@@ -1,8 +1,6 @@
-import sys
 import os
 import torch
 import random
-import time
 import faiss
 import logging
 import argparse
@@ -13,9 +11,9 @@ from torch.utils.data import DataLoader, RandomSampler
 from transformers import (AdamW, 
     get_linear_schedule_with_warmup,
     RobertaConfig)
-from dataset import (TextTokenIdsCache, 
+from repconc.dataset import (TextTokenIdsCache, 
     SequenceDataset, load_rel, pack_tensor_2D)
-from modeling import QuantDot
+from repconc.model import QuantDot
 logger = logging.getLogger(__name__)
 logging.basicConfig(format = '%(asctime)s-%(levelname)s-%(name)s- %(message)s',
                         datefmt = '%d %H:%M:%S',

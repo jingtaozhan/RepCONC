@@ -8,7 +8,7 @@ doc_encoder_dir="./data/${dataset}/official_doc_encoders/m${m}.marcopass.pq.enco
 query_encoder_dir="./data/${dataset}/official_query_encoders/m${m}.marcopass.query.encoder"
 output_path="./data/${dataset}/run_encode/m${m}-l1.marcopass.ivfpq.index"
 
-python ./run_encode.py \
+python -m repconc.run_encode.py \
     --preprocess_dir ./data/${dataset}/preprocess \
     --doc_encoder_dir $doc_encoder_dir \
     --output_path $output_path \
@@ -25,7 +25,7 @@ doc_encoder_dir="./data/${dataset}/official_doc_encoders/m${m}.marcodoc.pq.encod
 query_encoder_dir="./data/${dataset}/official_query_encoders/m${m}.marcodoc.query.encoder"
 output_path="./data/${dataset}/run_encode/m${m}-l1.marcodoc.ivfpq.index"
 
-python ./run_encode.py \
+python -m repconc.run_encode.py \
     --preprocess_dir ./data/${dataset}/preprocess \
     --doc_encoder_dir $doc_encoder_dir \
     --output_path $output_path \

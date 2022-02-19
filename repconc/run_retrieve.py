@@ -1,6 +1,5 @@
 # coding=utf-8
 import os
-from urllib import parse
 import torch
 import faiss
 import logging
@@ -8,12 +7,11 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 from transformers import RobertaConfig
-from modeling import QuantDot, QuantDot
-from timeit import default_timer as timer
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.sampler import SequentialSampler
 
-from dataset import TextTokenIdsCache, SequenceDataset, get_collate_function
+from repconc.model import QuantDot, QuantDot
+from repconc.dataset import TextTokenIdsCache, SequenceDataset, get_collate_function
 
 logger = logging.Logger(__name__, level=logging.INFO)
 handler = logging.StreamHandler()

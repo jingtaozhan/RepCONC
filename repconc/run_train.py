@@ -20,8 +20,8 @@ from torch.utils.tensorboard import SummaryWriter
 from transformers.integrations import TensorBoardCallback, TrainerCallback
 from transformers.optimization import Adafactor, AdamW, get_scheduler
 
-from modeling import RepCONC
-from dataset import (TextTokenIdsCache, load_rel, 
+from repconc.model import RepCONC
+from repconc.dataset import (TextTokenIdsCache, load_rel, 
     TrainInbatchWithHardDataset,
     triple_get_collate_function,
 )
