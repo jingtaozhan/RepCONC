@@ -3,11 +3,12 @@
 This is the official repo for our WSDM'22 paper, [Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval](https://arxiv.org/pdf/2110.05789.pdf). 
 
 **************************** **Updates** ****************************
-* 11/13: We released code to evaluate [zero-shot retrieval performance](#zero-shot-retrieval) of RepCONC and used BEIR benchmark as an example.
-* 11/5: We released [ranking results](#ranking-results) for queries from MS MARCO development set and TREC 2019 Deep Learning Track.
-* 11/3: We released code for [encoding corpus](#encode-corpus) and [IVF acceleration](#build-ivf-index).
-* 11/2: We released our [model checkpoints](#models-and-indexes) and [retrieval code](#retrieval).
-* 10/13: Our paper has been accepted by WSDM! Please check out the [preprint paper](https://arxiv.org/pdf/2110.05789.pdf).
+* 2022-02-19: We released [training code](#training) for MS MARCO passage and document ranking.
+* 2021-11-13: We released code to evaluate [zero-shot retrieval performance](#zero-shot-retrieval) of RepCONC and used BEIR benchmark as an example.
+* 2021-11-05: We released [ranking results](#ranking-results) for queries from MS MARCO development set and TREC 2019 Deep Learning Track.
+* 2021-11-03: We released code for [encoding corpus](#encode-corpus) and [IVF acceleration](#build-ivf-index).
+* 2021-11-02: We released our [model checkpoints](#models-and-indexes) and [retrieval code](#retrieval).
+* 2021-10-13: Our paper has been accepted by WSDM! Please check out the [preprint paper](https://arxiv.org/pdf/2110.05789.pdf).
 
 ## Quick Links
 
