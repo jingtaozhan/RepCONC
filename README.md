@@ -21,6 +21,7 @@ This is the official repo for our WSDM'22 paper, [Learning Discrete Representati
     - [Build IVF Index](#build-ivf-index)
     - [Run Retrieval](#retrieval)
     - [Zero-shot Retrieval (BEIR)](#zero-shot-retrieval)
+  - [Train RepCONC](#training)
   - [Citation](#citation)
   - [Related Work](#related-work)
 
@@ -55,6 +56,10 @@ transformers == 4.3.3
 faiss-gpu == 1.7.1
 boto3
 ```
+We reuse many scripts of [JPQ](https://github.com/jingtaozhan/JPQ) library. Run the following installation command
+```bash
+pip install git+https://github.com/jingtaozhan/JPQ
+```
 
 ## Preprocess
 Here are the commands to for preprocessing/tokenization. 
@@ -65,12 +70,9 @@ bash download_data.sh
 ```
 Preprocessing (tokenizing) only requires a simple command:
 ```
-python preprocess.py --data_type doc; python preprocess.py --data_type passage
+python -m jpq.preprocess --data_type 0; python -m jpq.preprocess --data_type 1
 ```
 It will create two directories, i.e., `./data/passage/preprocess` and `./data/doc/preprocess`. We map the original qid/pid to new ids, the row numbers in the file. The mapping is saved to `pid2offset.pickle` and `qid2offset.pickle`, and new qrel files (`train/dev/test-qrel.tsv`) are generated. The passages and queries are tokenized and saved in the numpy memmap file. 
-
-Note: RepCONC, as long as most of our [prior models](#related-work), utilizes Transformers 2.x version to tokenize text. However, when Transformers library updates to 3.x or 4.x versions, the RobertaTokenizer behaves differently. 
-To support REPRODUCIBILITY, we copy the RobertaTokenizer source codes from 2.x version to [star_tokenizer.py](star_tokenizer.py). During preprocessing, we use `from star_tokenizer import RobertaTokenizer` instead of `from transformers import RobertaTokenizer`. It is also **necessary** for you to do this if you use our trained RepCONC models on other datasets. 
 
 ## Evaluate Open-sourced Checkpoints
 ### Models and Indexes
@@ -174,11 +176,6 @@ Arguments for this evaluation script are as follows,
 
 This section shows how to use RepCONC for other datasets in a zero-shot fashion.
 
-Since RepCONC is an extension of [JPQ](https://github.com/jingtaozhan/JPQ), the zero-shot process is exactly the same. Here we use JPQ package and please run the following command to install it.
-```bash
-pip install git+https://github.com/jingtaozhan/JPQ
-```
-
 We use [BEIR](https://github.com/UKPLab/beir) as an example because it involves a wide range of datasets. For your own dataset, you only need to format it in the same way as BEIR and you are good to go.
 
 Now, we show how to use JPQ for TREC-Covid dataset. Run
@@ -200,6 +197,161 @@ Here are the NDCG@10 on several datasets when M=48, i.e., 64x compression ratio:
 Dataset  | TREC-COVID | NFCorpus | NQ | HotpotQA | FiQA-2018 | ArguAna | Touche-2020 | Quora | DBPedia | SCIDOCS | FEVER | Climate-FEVER | SciFact	
 :----:|:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: |:-----: 
 RepCONC (64x Compression) | 0.684 | 0.266 | 0.440 | 0.425 | 0.273 | 0.420 | 0.210 | 0.850 | 0.293 | 0.120 | 0.637 | 0.205 | 0.509
+
+## Training
+
+RepCONC is initialized by [STAR](https://github.com/jingtaozhan/DRhard). STAR trained on passage ranking is available [here](https://drive.google.com/drive/folders/1bJw8P15cFiV239mTgFQxVilXMWqzqXUU?usp=sharing). STAR trained on document ranking is available [here](https://drive.google.com/drive/folders/18GrqZxeiYFxeMfSs97UxkVHwIhZPVXTc?usp=sharing). 
+
+First, use STAR to encode the corpus and run OPQ to initialize the index. For example, on passage ranking task, please run:
+```bash
+dataset="doc" # or "passage" 
+if [ $dataset = "passage" ]; then max_doc_length=256 else max_doc_length=512 ; fi
+M=48; python -m jpq.run_init \
+  --preprocess_dir ./data/$dataset/preprocess/ \
+  --model_dir ./data/$dataset/star \
+  --max_doc_length $max_doc_length \
+  --output_dir ./data/$dataset/init \
+  --subvector_num $M
+```
+
+Next, mine hard negatives. Retrieve top passages for training queries (passage ranking task) using:
+```bash
+dataset="doc" # or "passage"
+M=48; python -m jpq.run_retrieval \
+      --preprocess_dir ./data/$dataset/preprocess/ \
+      --index_path ./data/$dataset/init/OPQ$M,IVF1,PQ${M}x8.index \
+      --mode train \
+      --query_encoder_dir ./data/$dataset/star \
+      --output_path ./data/$dataset/init/m$M.train.rank.tsv \
+      --batch_size 128 \
+      --max_query_length 32 \
+      --topk 210 \
+      --gpu_search
+```
+To validate the quality of retrieved passages, use the following command to evaluate MRR@10. You should get about 0.291 metric score.
+```bash
+M=48
+dataset="doc" # or "passage"
+if [ $dataset = "passage" ]; then trunc=10 else trunc=100 ; fi
+python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$dataset/init/m$M.train.rank.tsv $trunc
+```
+We use top-200 irrelevant passages as hard negatives.
+```bash
+dataset="doc" # or "passage"
+M=48; python ./gen_hardnegs.py \
+      --rank ./data/$dataset/init/m48.train.rank.tsv \
+      --qrel ./data/$dataset/preprocess/train-qrel.tsv \
+      --top 200 \
+      --output ./data/$dataset/init/m48.hardneg.json
+```
+
+Third, use constrained clustering technique for joint optimization
+```bash
+M=48
+dataset="doc" # or "document"
+if [ $dataset = "passage" ]
+then 
+  max_doc_length=110 
+  batch=1024
+  multibatch_per_forward=6
+  num_train_epochs=8
+else 
+  max_doc_length=512 
+  batch=256
+  multibatch_per_forward=6
+  num_train_epochs=20
+fi
+train_root="./data/$dataset/train/m48"
+python ./run_train.py \
+      --learning_rate 5e-6 \
+      --centroid_lr 2e-4 \
+      --lr_scheduler_type constant \
+      --num_train_epochs $num_train_epochs \
+      --max_query_length 24 \
+      --max_doc_length $max_doc_length \
+      --preprocess_dir ./data/$dataset/preprocess \
+      --label_path ./data/$dataset/preprocess/train-qrel.tsv \
+      --MCQ_M $M \
+      --MCQ_K 256 \
+      --opq_path ./data//$dataset/init/OPQ$M,IVF1,PQ$Mx8.index \
+      --hardneg_path ./data//$dataset/init/m$M.hardneg.json \
+      --init_model_path ./data//$dataset/star \
+      --multibatch_per_forward 6 \
+      --per_device_train_batch_size $batch \
+      --fp16 \
+      --gradient_checkpointing \
+      --output_dir $train_root/models \
+      --logging_dir  $train_root/log \
+      --sk_epsilon 0.05 \
+      --mse_weight 0.05 
+```
+Models are saved per epoch. You can evaluate the checkpoint with 
+```bash
+M=48
+dataset="passage" # or "document"
+if [ $dataset = "passage" ]; then max_doc_length=256 else max_doc_length=512 ; fi
+ckpt=XXXX # the training step, e.g., 3444
+train_root="./data/$dataset/train/m48"
+python ./run_encode.py \
+    --preprocess_dir ./data/$dataset/preprocess \
+    --doc_encoder_dir $train_root/models/checkpoint-$ckpt \
+    --output_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
+    --batch_size 128 \
+    --max_doc_length $max_doc_length
+for mode in "dev" "test"; do 
+python ./run_retrieve.py \
+    --preprocess_dir ./data/$dataset/preprocess \
+    --index_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
+    --mode $mode \
+    --query_encoder_dir $train_root/models/checkpoint-$ckpt \
+    --output_path $train_root/evaluate/checkpoint-$ckpt/m$M.$mode.rank \
+    --batch_size 128 \
+    --nprobe 1 \
+    --gpu_search
+done
+if [ $dataset = "passage" ]; then trunc=10 else trunc=100 ; fi
+python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$dataset/init/m$M.train.rank.tsv $trunc
+./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/evaluate/checkpoint-$ckpt/m$M.test.rank
+```
+
+Finally, we adopt JPQ to train the query encoder and PQ centroids. The Index Assignments are fixed in this stage. 
+```bash
+M=48
+dataset="passage" # or "doc"
+ckpt=xxxx # the initialized RepCONC model checkpoint, e.g., 3444
+train_root="./data/passage/train/m48"
+python run_2nd_train.py \
+    --preprocess_dir ./data/$dataset/preprocess \
+    --model_save_dir $train_root/query_models \
+    --log_dir $train_root/jpq_log \
+    --init_index_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
+    --init_model_path $train_root/models/checkpoint-$ckpt \
+    --centroid_lr 2e-5 \
+    --lr 2e-6 \
+    --train_batch_size 128 \
+    --loss list
+```
+You can evaluate the checkpoint with 
+```bash
+M=48
+dataset="passage" # or "doc"
+epoch=1 # the training step, e.g., 3444
+train_root="./data/passage/train/m48"
+for mode in "dev" "test"; do 
+python ./run_retrieve.py \
+    --preprocess_dir ./data/$dataset/preprocess \
+    --index_path $train_root/query_models/epoch-$epoch/index \
+    --mode $mode \
+    --query_encoder_dir $train_root/query_models/epoch-$epoch \
+    --output_path $train_root/2nd_evaluate/epoch-$epoch/m$M.$mode.rank \
+    --batch_size 128 \
+    --nprobe 1 \
+    --gpu_search
+done
+if [ $dataset = "passage" ]; then trunc=10 else trunc=100 ; fi
+python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$dataset/init/m$M.train.rank.tsv $trunc
+./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/2nd_evaluate/epoch-$epoch/m$M.test.rank
+```
 
 
 ## Citation

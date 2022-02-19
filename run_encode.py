@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 from transformers import RobertaConfig
-from model.modeling import QuantDot, QuantDot
+from modeling import QuantDot
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.sampler import SequentialSampler
 
@@ -103,7 +103,7 @@ def main():
     faiss.copy_array_to_vector(coarse_embeds.ravel(), coarse_quantizer.xb)
     # set centroid values 
     centroids = faiss.vector_to_array(fake_index.pq.centroids)
-    centroids = centroids.reshape(48, 256, -1)
+    centroids = centroids.reshape(config.MCQ_M, 256, -1)
     centroids[:] = model.centroids.data.detach().cpu().numpy()
     faiss.copy_array_to_vector(centroids.ravel(), fake_index.pq.centroids)
     # some other stuffs
@@ -119,7 +119,7 @@ def main():
         config = config_class.from_pretrained(args.query_encoder_dir)
         query_encoder = model_class.from_pretrained(args.query_encoder_dir, config=config)
         centroids = faiss.vector_to_array(index.pq.centroids)
-        centroids = centroids.reshape(48, 256, -1)
+        centroids = centroids.reshape(config.MCQ_M, 256, -1)
         centroids[:] = query_encoder.centroids.data.detach().cpu().numpy()
         faiss.copy_array_to_vector(centroids.ravel(), index.pq.centroids)
     else:

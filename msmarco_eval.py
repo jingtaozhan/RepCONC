@@ -10,7 +10,7 @@ Last Modified : 1/21/2019
 Authors : Daniel Campos <dacamp@microsoft.com>, Rutger van Haasteren <ruvanh@microsoft.com>
 """
 """
-I (Jingtao Zhan) modified this script for evaluating MSMARCO Doc dataset. --- 4/19/2021
+Jingtao Zhan modified this script for evaluating MSMARCO Doc dataset. --- 2/18/2022
 """
 import sys
 import statistics
@@ -28,18 +28,14 @@ def load_reference_from_stream(f):
     qids_to_relevant_passageids = {}
     for l in f:
         try:
-            if EVAL_DOC:
-                l = l.strip().split(' ')
-            else:
-                l = l.strip().split('\t')
+            l = l.strip().split()
             qid = int(l[0])
             if qid in qids_to_relevant_passageids:
                 pass
             else:
                 qids_to_relevant_passageids[qid] = []
             if EVAL_DOC:
-                assert l[2][0] == "D"
-                qids_to_relevant_passageids[qid].append(int(l[2][1:]))
+                qids_to_relevant_passageids[qid].append(l[2])
             else:
                 qids_to_relevant_passageids[qid].append(int(l[2]))
         except:
@@ -63,11 +59,10 @@ def load_candidate_from_stream(f):
     qid_to_ranked_candidate_passages = {}
     for l in f:
         try:
-            l = l.strip().split('\t')
+            l = l.strip().split()
             qid = int(l[0])
             if EVAL_DOC:
-                assert l[1][0] == "D"
-                pid = int(l[1][1:])
+                pid = l[1]
             else:
                 pid = int(l[1])
             rank = int(l[2])
