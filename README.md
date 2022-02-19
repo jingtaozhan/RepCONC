@@ -238,7 +238,7 @@ python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$datas
 We use top-200 irrelevant passages as hard negatives.
 ```bash
 dataset="doc" # or "passage"
-M=48; python -m repconc.gen_hardnegs.py \
+M=48; python -m repconc.gen_hardnegs \
       --rank ./data/$dataset/init/m48.train.rank.tsv \
       --qrel ./data/$dataset/preprocess/train-qrel.tsv \
       --top 200 \
@@ -262,7 +262,7 @@ else
   num_train_epochs=20
 fi
 train_root="./data/$dataset/train/m48"
-python -m repconc.run_train.py \
+python -m repconc.run_train \
       --learning_rate 5e-6 \
       --centroid_lr 2e-4 \
       --lr_scheduler_type constant \
@@ -294,14 +294,14 @@ dataset="doc" # or "passage"
 if [ $dataset = "passage" ]; then max_doc_length=256 ; else max_doc_length=512 ; fi
 echo max_doc_length: $max_doc_length
 train_root="./data/$dataset/train/m48"
-python -m repconc.run_encode.py \
+python -m repconc.run_encode \
     --preprocess_dir ./data/$dataset/preprocess \
     --doc_encoder_dir $train_root/models/checkpoint-$ckpt \
     --output_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
     --batch_size 128 \
     --max_doc_length $max_doc_length
 for mode in "dev" "test"; do 
-python -m repconc.run_retrieve.py \
+python -m repconc.run_retrieve \
     --preprocess_dir ./data/$dataset/preprocess \
     --index_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
     --mode $mode \
@@ -322,7 +322,7 @@ M=48
 dataset="doc" # or "passage"
 ckpt=xxxx # the initialized RepCONC model checkpoint. Select one with the best dev performance.
 train_root="./data/$dataset/train/m48"
-python -m repconc.run_2nd_train.py \
+python -m repconc.run_2nd_train \
     --preprocess_dir ./data/$dataset/preprocess \
     --model_save_dir $train_root/2nd_models \
     --log_dir $train_root/2nd_log \
@@ -340,7 +340,7 @@ dataset="doc" # or "doc"
 epoch=X # Usually model at 4-th epoch is the best
 train_root="./data/$dataset/train/m48"
 for mode in "dev" "test"; do 
-python -m repconc.run_retrieve.py \
+python -m repconc.run_retrieve \
     --preprocess_dir ./data/$dataset/preprocess \
     --index_path $train_root/2nd_models/epoch-$epoch/index \
     --mode $mode \

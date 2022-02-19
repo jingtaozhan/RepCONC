@@ -21,7 +21,7 @@ for mode in "dev" "test" ; do
             preprocess_dir="./data/${dataset}/preprocess"
             output_path=./data/$dataset/run_retrieve/${mode}/run.${mode}.m${m}.rank
             # cpu/gpu search may lead to a little difference in effectiveness
-            python -m repconc.run_retrieve.py \
+            python -m repconc.run_retrieve \
                 --preprocess_dir $preprocess_dir \
                 --index_path $index_path \
                 --mode $mode \
@@ -48,7 +48,7 @@ for mode in "dev" "test" ; do
 
             echo "Convert qids and pids to official ids"
             official_id_rank_path=./data/$dataset/run_retrieve/${mode}/official.run.${mode}.m${m}.rank
-            python -m repconc.cvt_back.py \
+            python -m repconc.cvt_back \
                 --input_path $output_path \
                 --preprocess_dir $preprocess_dir \
                 --mode $mode \
