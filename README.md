@@ -285,12 +285,14 @@ python ./run_train.py \
       --sk_epsilon 0.05 \
       --mse_weight 0.05 
 ```
+Hyper-parameters are different for different `M` values. Please refer to our paper for detailed settings.
 Models are saved per epoch. You can evaluate the checkpoint with 
 ```bash
-M=48
-dataset="passage" # or "document"
-if [ $dataset = "passage" ]; then max_doc_length=256 else max_doc_length=512 ; fi
 ckpt=XXXX # the training step, e.g., 3444
+M=48
+dataset="doc" # or "passage"
+if [ $dataset = "passage" ]; then max_doc_length=256 ; else max_doc_length=512 ; fi
+echo max_doc_length: $max_doc_length
 train_root="./data/$dataset/train/m48"
 python ./run_encode.py \
     --preprocess_dir ./data/$dataset/preprocess \
@@ -309,21 +311,21 @@ python ./run_retrieve.py \
     --nprobe 1 \
     --gpu_search
 done
-if [ $dataset = "passage" ]; then trunc=10 else trunc=100 ; fi
-python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$dataset/init/m$M.train.rank.tsv $trunc
+if [ $dataset = "passage" ]; then trunc=10 ; else trunc="doc" ; fi
+python ./msmarco_eval.py ./data/$dataset/preprocess/dev-qrel.tsv $train_root/evaluate/checkpoint-$ckpt/m$M.dev.rank $trunc
 ./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/evaluate/checkpoint-$ckpt/m$M.test.rank
 ```
 
 Finally, we adopt JPQ to train the query encoder and PQ centroids. The Index Assignments are fixed in this stage. 
 ```bash
 M=48
-dataset="passage" # or "doc"
-ckpt=xxxx # the initialized RepCONC model checkpoint, e.g., 3444
-train_root="./data/passage/train/m48"
+dataset="doc" # or "passage"
+ckpt=xxxx # the initialized RepCONC model checkpoint. Select one with the best dev performance.
+train_root="./data/$dataset/train/m48"
 python run_2nd_train.py \
     --preprocess_dir ./data/$dataset/preprocess \
-    --model_save_dir $train_root/query_models \
-    --log_dir $train_root/jpq_log \
+    --model_save_dir $train_root/2nd_models \
+    --log_dir $train_root/2nd_log \
     --init_index_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
     --init_model_path $train_root/models/checkpoint-$ckpt \
     --centroid_lr 2e-5 \
@@ -334,22 +336,22 @@ python run_2nd_train.py \
 You can evaluate the checkpoint with 
 ```bash
 M=48
-dataset="passage" # or "doc"
-epoch=1 # the training step, e.g., 3444
-train_root="./data/passage/train/m48"
+dataset="doc" # or "doc"
+epoch=1 # Usually model at 4-th epoch is the best
+train_root="./data/$dataset/train/m48"
 for mode in "dev" "test"; do 
 python ./run_retrieve.py \
     --preprocess_dir ./data/$dataset/preprocess \
-    --index_path $train_root/query_models/epoch-$epoch/index \
+    --index_path $train_root/2nd_models/epoch-$epoch/index \
     --mode $mode \
-    --query_encoder_dir $train_root/query_models/epoch-$epoch \
+    --query_encoder_dir $train_root/2nd_models/epoch-$epoch \
     --output_path $train_root/2nd_evaluate/epoch-$epoch/m$M.$mode.rank \
     --batch_size 128 \
     --nprobe 1 \
     --gpu_search
 done
-if [ $dataset = "passage" ]; then trunc=10 else trunc=100 ; fi
-python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$dataset/init/m$M.train.rank.tsv $trunc
+if [ $dataset = "passage" ]; then trunc=10 ; else trunc=100 ; fi
+python ./msmarco_eval.py ./data/$dataset/preprocess/dev-qrel.tsv $train_root/2nd_evaluate/epoch-$epoch/m$M.dev.rank $trunc
 ./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/2nd_evaluate/epoch-$epoch/m$M.test.rank
 ```
 
@@ -357,11 +359,18 @@ python ./msmarco_eval.py ./data/$dataset/preprocess/train-qrel.tsv ./data/$datas
 ## Citation
 If you find this repo useful, please consider citing our work:
 ```
-@article{zhan2021learning,
-  title={Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval},
-  author={Zhan, Jingtao and Mao, Jiaxin and Liu, Yiqun and Guo, Jiafeng and Zhang, Min and Ma, Shaoping},
-  journal={arXiv preprint arXiv:2110.05789},
-  year={2021}
+@inproceedings{zhan2022learning,
+author = {Zhan, Jingtao and Mao, Jiaxin and Liu, Yiqun and Guo, Jiafeng and Zhang, Min and Ma, Shaoping},
+title = {Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval},
+year = {2022},
+publisher = {Association for Computing Machinery},
+url = {https://doi.org/10.1145/3488560.3498443},
+doi = {10.1145/3488560.3498443},
+booktitle = {Proceedings of the Fifteenth ACM International Conference on Web Search and Data Mining},
+pages = {1328–1336},
+numpages = {9},
+location = {Virtual Event, AZ, USA},
+series = {WSDM '22}
 }
 ```
 
