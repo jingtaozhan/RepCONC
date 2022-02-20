@@ -336,7 +336,7 @@ You can evaluate the checkpoint with
 ```bash
 M=48
 dataset="doc" # or "doc"
-epoch=X # Usually model at 4-th epoch is the best
+epoch=X # ranging from 1 to total training epoch (default: 6)
 train_root="./data/$dataset/train/m48"
 for mode in "dev" "test"; do 
 python -m repconc.run_retrieve \
