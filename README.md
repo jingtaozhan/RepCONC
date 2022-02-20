@@ -249,7 +249,7 @@ M=48; python -m repconc.gen_hardnegs \
 Third, use constrained clustering technique to obtain supervised Index Assignments.
 ```bash
 M=48
-dataset="doc" # or "document"
+dataset="doc" # or "passage"
 if [ $dataset = "passage" ]
 then 
   max_doc_length=110 
@@ -335,7 +335,7 @@ python -m repconc.run_centroid_train \
 You can evaluate the checkpoint with 
 ```bash
 M=48
-dataset="doc" # or "doc"
+dataset="doc" # or "passage"
 epoch=X # ranging from 1 to total training epoch (default: 6)
 train_root="./data/$dataset/train/m48"
 for mode in "dev" "test"; do 
