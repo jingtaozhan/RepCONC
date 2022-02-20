@@ -172,6 +172,27 @@ Arguments for this evaluation script are as follows,
 * `--gpu_search`: Whether to use gpu for embedding search.
 * `--nprobe`: How many inverted lists to probe. This value shoule lie in [1, number of inverted lists].
  
+The above script requires that the queries are preprocessed (see [Preprocess](#preprocess)). Therefore, it is a bit troublesome if you just want to retrieve passages/docs for some new queries. Here we provide instructions on how to do this. We take TREC 2020 queries as an example. We use this [tokenize_retrieve.py](repconc/tokenize_retrieve.py), which supports **on-the-fly** query tokenization. 
+Please download TREC 2020 queries:
+```
+sh ./cmds/download_trec20.sh
+```
+Run this shell script for retrieval and evaluation:
+```
+sh ./cmds/run_tokenize_retrieve.sh
+```
+It calls [tokenize_retrieve](repconc/tokenize_retrieve.py). Arguments for this evaluation script are as follows,
+* `--query_file_path`: Query file with TREC format.  
+* `--index_path`: Index path.
+* `--query_encoder_dir`:  Query encoder dir, which involves `config.json` and `pytorch_model.bin`.
+* `--output_path`:  Output ranking file path.
+* `--pid2offset_path`:  It is used only for converting offset pids to official pids.
+* `--dataset`:  "doc" or "passage". It is used to convert offset pids to official pids because msmarco doc adds a 'D' as docid prefix. 
+* `--max_query_length`: Max query length, default: 32.
+* `--nprobe`: How many inverted lists to probe. This value shoule lie in [1, number of inverted lists]. 
+* `--batch_size`: Encoding and retrieval batch size at each iteration.
+* `--topk`: Retrieve topk passages/documents.
+* `--gpu_search`: Whether to use gpu for embedding search.
 
 ### Zero-shot Retrieval 
 
