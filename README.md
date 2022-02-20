@@ -261,7 +261,7 @@ fi
 multibatch_per_forward=6
 num_train_epochs=10
 train_root="./data/$dataset/train/m48"
-python -m repconc.run_train \
+python -m repconc.run_idx_assign_train \
       --learning_rate 5e-6 \
       --centroid_lr 2e-4 \
       --lr_scheduler_type constant \
@@ -279,8 +279,8 @@ python -m repconc.run_train \
       --per_device_train_batch_size $batch \
       --fp16 \
       --gradient_checkpointing \
-      --output_dir $train_root/models \
-      --logging_dir  $train_root/log \
+      --output_dir $train_root/assign_models \
+      --logging_dir  $train_root/assign_log \
       --sk_epsilon 0.05 \
       --mse_weight 0.05 
 ```
@@ -295,24 +295,24 @@ echo max_doc_length: $max_doc_length
 train_root="./data/$dataset/train/m48"
 python -m repconc.run_encode \
     --preprocess_dir ./data/$dataset/preprocess \
-    --doc_encoder_dir $train_root/models/checkpoint-$ckpt \
-    --output_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
+    --doc_encoder_dir $train_root/assign_models/checkpoint-$ckpt \
+    --output_path $train_root/assign_evaluate/checkpoint-$ckpt/m$M.index \
     --batch_size 128 \
     --max_doc_length $max_doc_length
 for mode in "dev" "test"; do 
 python -m repconc.run_retrieve \
     --preprocess_dir ./data/$dataset/preprocess \
-    --index_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
+    --index_path $train_root/assign_evaluate/checkpoint-$ckpt/m$M.index \
     --mode $mode \
-    --query_encoder_dir $train_root/models/checkpoint-$ckpt \
-    --output_path $train_root/evaluate/checkpoint-$ckpt/m$M.$mode.rank \
+    --query_encoder_dir $train_root/assign_models/checkpoint-$ckpt \
+    --output_path $train_root/assign_evaluate/checkpoint-$ckpt/m$M.$mode.rank \
     --batch_size 128 \
     --nprobe 1 \
     --gpu_search
 done
 if [ $dataset = "passage" ]; then trunc=10 ; else trunc="doc" ; fi
-python ./msmarco_eval.py ./data/$dataset/preprocess/dev-qrel.tsv $train_root/evaluate/checkpoint-$ckpt/m$M.dev.rank $trunc
-./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/evaluate/checkpoint-$ckpt/m$M.test.rank
+python ./msmarco_eval.py ./data/$dataset/preprocess/dev-qrel.tsv $train_root/assign_evaluate/checkpoint-$ckpt/m$M.dev.rank $trunc
+./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/assign_evaluate/checkpoint-$ckpt/m$M.test.rank
 ```
 
 Finally, we adopt JPQ to train the query encoder and PQ centroids. The Index Assignments are fixed in this stage. 
@@ -321,12 +321,12 @@ M=48
 dataset="doc" # or "passage"
 ckpt=xxxx # the initialized RepCONC model checkpoint. Select one with the best dev performance.
 train_root="./data/$dataset/train/m48"
-python -m repconc.run_2nd_train \
+python -m repconc.run_centroid_train \
     --preprocess_dir ./data/$dataset/preprocess \
-    --model_save_dir $train_root/2nd_models \
-    --log_dir $train_root/2nd_log \
-    --init_index_path $train_root/evaluate/checkpoint-$ckpt/m$M.index \
-    --init_model_path $train_root/models/checkpoint-$ckpt \
+    --model_save_dir $train_root/centroid_models \
+    --log_dir $train_root/centroid_log \
+    --init_index_path $train_root/assign_evaluate/checkpoint-$ckpt/m$M.index \
+    --init_model_path $train_root/assign_models/checkpoint-$ckpt \
     --centroid_lr 2e-5 \
     --lr 2e-6 \
     --train_batch_size 128 \
@@ -341,17 +341,17 @@ train_root="./data/$dataset/train/m48"
 for mode in "dev" "test"; do 
 python -m repconc.run_retrieve \
     --preprocess_dir ./data/$dataset/preprocess \
-    --index_path $train_root/2nd_models/epoch-$epoch/index \
+    --index_path $train_root/centroid_models/epoch-$epoch/index \
     --mode $mode \
-    --query_encoder_dir $train_root/2nd_models/epoch-$epoch \
-    --output_path $train_root/2nd_evaluate/epoch-$epoch/m$M.$mode.rank \
+    --query_encoder_dir $train_root/centroid_models/epoch-$epoch \
+    --output_path $train_root/centroid_evaluate/epoch-$epoch/m$M.$mode.rank \
     --batch_size 128 \
     --nprobe 1 \
     --gpu_search
 done
 if [ $dataset = "passage" ]; then trunc=10 ; else trunc="doc" ; fi
-python ./msmarco_eval.py ./data/$dataset/preprocess/dev-qrel.tsv $train_root/2nd_evaluate/epoch-$epoch/m$M.dev.rank $trunc
-./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/2nd_evaluate/epoch-$epoch/m$M.test.rank
+python ./msmarco_eval.py ./data/$dataset/preprocess/dev-qrel.tsv $train_root/centroid_evaluate/epoch-$epoch/m$M.dev.rank $trunc
+./data/trec_eval-9.0.7/trec_eval -c -mrecall.100 -mndcg_cut.10 ./data/$dataset/preprocess/test-qrel.tsv $train_root/centroid_evaluate/epoch-$epoch/m$M.test.rank
 ```
 
 
