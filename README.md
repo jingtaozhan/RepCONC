@@ -1,6 +1,6 @@
 # RepCONC
 
-This is the official repo for our WSDM'22 paper, [Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval](https://arxiv.org/pdf/2110.05789.pdf). 
+This is the official repo for our WSDM'22 paper, [Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval](https://arxiv.org/pdf/2110.05789.pdf) (**Best Paper Award**). 
 
 **************************** **Updates** ****************************
 * 2022-02-19: We released [training code](#training) for MS MARCO passage and document ranking.
