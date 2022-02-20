@@ -254,14 +254,12 @@ if [ $dataset = "passage" ]
 then 
   max_doc_length=110 
   batch=1024
-  multibatch_per_forward=6
-  num_train_epochs=12
 else 
   max_doc_length=512 
   batch=256
-  multibatch_per_forward=6
-  num_train_epochs=20
 fi
+multibatch_per_forward=6
+num_train_epochs=10
 train_root="./data/$dataset/train/m48"
 python -m repconc.run_train \
       --learning_rate 5e-6 \
