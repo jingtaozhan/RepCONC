@@ -1,4 +1,4 @@
-# Compressing coCondenser on MS MARCO Passage Ranking
+# Compressing TAS-Balanced on MS MARCO Passage Ranking
 
 Here, we assume you have already follow the [previous instructions](..). 
 
@@ -13,16 +13,16 @@ The following instructions set the number of sub-vectors to $64$. You can also s
 # number of gpus to use is 8 (first argument)
 
 # Generate hard negatives
-sh ./examples/cocondenser/repconc/6_gen_hardneg.sh 8 64
+sh ./examples/tas-balanced/repconc/6_gen_hardneg.sh 8 64
 
 # Run training
-sh ./examples/cocondenser/repconc/7_run_conc_train.sh 8 64
+sh ./examples/tas-balanced/repconc/7_run_conc_train.sh 8 64
 
 # Encodes the corpus
-sh ./examples/cocondenser/repconc/8_run_conc_eval.sh 8 64
+sh ./examples/tas-balanced/repconc/8_run_conc_eval.sh 8 64
 
 # For example, here is the performance on MS MARCO dev set after stage-1 training.
-more data/cocondenser-marco-passage/subvector-64/repconc/encoder_output/dev/metric.json 
+more data/tas-b-marco-passage/subvector-64/repconc/encoder_output/dev/metric.json 
 ```
 
 
@@ -34,11 +34,11 @@ more data/cocondenser-marco-passage/subvector-64/repconc/encoder_output/dev/metr
 # Encoding queries is fast and does not need multi-gpu inference.
 
 # Run training
-sh ./examples/cocondenser/repconc/9_run_jpq_train.sh 64
+sh ./examples/tas-balanced/repconc/9_run_jpq_train.sh 64
 
 # Evaluation
-sh ./examples/cocondenser/repconc/10_run_jpq_eval.sh 64
+sh ./examples/tas-balanced/repconc/10_run_jpq_eval.sh 64
 
 # For example, here is the performance on MS MARCO dev set.
-more data/cocondenser-marco-passage/subvector-64/repconc/query_encoder_results/dev/metric.json 
+more data/tas-b-marco-passage/subvector-64/repconc/query_encoder_results/dev/metric.json 
 ```

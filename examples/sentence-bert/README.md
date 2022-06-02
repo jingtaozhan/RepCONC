@@ -29,7 +29,7 @@ The working directory is scheduled to be:
 │   ├── subvector-X (X is the number of sub-vectors)
 │   │   ├── warmup (OPQ Warmup of SBERT)
 │   │   ├── warmup_output (OPQ Output of SBERT warmup checkpoint)
-│   │   ├── hardneg.json (hard negatives for conc training)
+│   │   ├── hardneg.json (hard negatives for repconc training)
 │   │   ├── jpq (training directory of jpq)
 │   │   ├── repconc (training directory of repconc)
 ```
@@ -47,7 +47,7 @@ sh ./examples/sentence-bert/1_prepare_dataset.sh
 # SBERT uses mean pooling and inner product. Add the two fields to the config.json and save the model.
 sh ./examples/sentence-bert/2_customize_dense.sh
 
-# Let SBERT encodes the corpus. We can know whether we reproduce right. And the corpus encoding can be reused by warmup process or JPQ training process.
+# Let SBERT encode the corpus. We can know whether we reproduce right. And the corpus encoding can be reused by warmup process or JPQ training process.
 # For example, there are 8 gpus available.
 sh ./examples/sentence-bert/3_encode_dense_corpus.sh 8
 
