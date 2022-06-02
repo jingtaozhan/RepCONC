@@ -39,11 +39,6 @@ class RepCONC(nn.Module):
         # so we can use the rotation matrix of OPQ
         self.register_buffer('rotation', torch.eye(dense_encoder.config.hidden_size))
         self.centroids = nn.Parameter(torch.randn((config.MCQ_M, config.MCQ_K, config.hidden_size // config.MCQ_M)))
-        # dense encoder uses layer norm when outputing the embedding, 
-        # we can initialize centroids better by using the weight and bias of layer norm.
-        # encoder_layer_norm = dense_encoder.language_model.encoder.layer[-1].output.LayerNorm
-        # self.centroids.data.copy_(
-        #     self.centroids.data * encoder_layer_norm.weight.reshape(config.MCQ_M, 1, -1) + encoder_layer_norm.bias.reshape(config.MCQ_M, 1, -1))
         if self.config.similarity_metric == "METRIC_CENTROID_COS":
             self.normalize_centrodis()
         self.centroids.requires_grad = True
