@@ -1,27 +1,24 @@
 from setuptools import setup, find_packages
 
-with open('README.md') as f:
-    readme = f.read()
-
 setup(
-    name='RepCONC',
-    version='0.1.0',
+    name='repconc',
+    version='0.2.0',
+    packages=find_packages("src"),
+    package_dir={'': 'src'},
     description='Learning Discrete Representations via Constrained Clustering for Effective and Efficient Dense Retrieval',
     url='https://github.com/jingtaozhan/RepCONC',
     classifiers=[
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
-    packages=['repconc'],
-    long_description=readme,
+    author='Jingtao Zhan',
+    author_email='jingtaozhan@gmail.com',
     install_requires=[
-        'torch >= 1.9.0',
-        'transformers >= 4.3.3',
+        'torch >= 1.10.1',
+        'transformers >= 4.19.2',
         #'faiss-gpu == 1.7.1',#faiss should be installed manually
-        'tensorboard >= 2.5.0',
-        'boto3',
-        'jpq@git+https://github.com/jingtaozhan/JPQ#egg=jpq'
+        'GradCache@git+https://github.com/luyug/GradCache#egg=GradCache'
     ],
 )
