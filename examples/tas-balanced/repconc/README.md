@@ -8,6 +8,8 @@ The following instructions set the number of sub-vectors to $64$. You can also s
 
 ### RepCONC Training STAGE-1
 
+*Note: In stage-1, we use distributed training for acceleration. We train the models on 8 NVIDIA-V100 GPUs for about 3.5 hours. If you use different numbers of GPUs, it is possible that you need to tune the learning rate accordingly because: [PyTorch averages gradients across all nodes. When a model is trained on M nodes with batch=N, the gradient will be M times smaller when compared to the same model trained on a single node with batch=M*N. You can use a smaller learning rate when training with fewer gpus.](https://pytorch.org/docs/master/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel). That said, we find RepCONC is not sensitive to different learning rate and you can just use the learning rate in this example as default values.*
+
 ```bash
 # For example, 
 # number of gpus to use is 8 (first argument)

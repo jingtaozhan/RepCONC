@@ -44,7 +44,7 @@ valid_corpus_path="$valid_data_root/corpus.tsv"
 
 model_name_or_path="${root}/subvector-${subvector}/warmup"
 hardneg_path="${root}/subvector-${subvector}/hardneg.json"
-train_name="encoder_l${learning_rate}-cl${centroid_learning_rate}-b${full_batch_size}-m${mse_loss_weight}-n${negative_per_query}"
+train_name="encoder_l${learning_rate}-cl${centroid_learning_rate}-b${full_batch_size}-m${mse_loss_weight}-n${negative_per_query}-gpu${gpus}"
 output_dir="${root}/subvector-${subvector}/repconc/${train_name}"
 
 echo output_dir: $output_dir
