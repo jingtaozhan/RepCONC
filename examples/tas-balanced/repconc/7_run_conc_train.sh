@@ -105,4 +105,8 @@ python $distributed_cmd \
   |& tee $log_path   
 
 cd "${root}/subvector-${subvector}/repconc"
-ln -sf "$train_name" "encoder"
+if [ -f "encoder" ]; then
+    echo "encoder symbolic already exists."
+else 
+    ln -s "$train_name" "encoder"
+fi

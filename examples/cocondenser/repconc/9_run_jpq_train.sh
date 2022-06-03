@@ -64,4 +64,8 @@ python -m repconc.train.run_train_jpq \
   |& tee $log_path   
 
 cd "${root}/subvector-${subvector}/repconc"
-ln -sf "$train_name" "query_encoder"
+if [ -f "query_encoder" ]; then
+    echo "query_encoder symbolic already exists."
+else 
+    ln -s "$train_name" "query_encoder"
+fi
