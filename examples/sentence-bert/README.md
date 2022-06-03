@@ -53,11 +53,6 @@ sh ./examples/sentence-bert/3_encode_dense_corpus.sh 8
 
 # Generate validation set. Sample a small corpus for efficient validation during training.
 sh ./examples/sentence-bert/4_gen_valid_set.sh
-
-# Use OPQ to compute centroids. It will be used to warmup JPQ and RepCONC.
-# For example, number of sub-vectors is set to 64.
-# That is, the compression ratio is 768/64=48. 
-sh ./examples/sentence-bert/5_opq_warmup.sh 64
 ```
 
 ### Index Compression (and Joint Optimization)
