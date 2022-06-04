@@ -4,7 +4,7 @@ This is the instructions about how to transfer [TCT-ColBERT-V2](https://cs.uwate
 
 ## Retrieval Effectiveness
 
-Here is the effectiveness summarization about different compression methods. (Coming soon)
+Here is the effectiveness summarization about different compression methods.
 
 | Models      | PQ Sub-vectors| Index Size  | Compression Ratio | MS MARCO Dev (MRR@10) | TREC 19 DL (NDCG@10) | TREC 20 DL (NDCG@10)
 | -----------       | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
