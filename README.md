@@ -6,7 +6,7 @@ This is the official repo for our WSDM'22 paper, [Learning Discrete Representati
 
   - [Quick Tour](#quick-tour)
   - [Installation](#installation)
-  - [Examples](#examples)
+  - [How to use](#how-to-use)
   - [Citation](#citation)
 
 ## Quick Tour 
