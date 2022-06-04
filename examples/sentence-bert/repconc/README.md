@@ -39,7 +39,7 @@ more data/sbert-marco-passage/subvector-64/repconc/encoder_output/dev/metric.jso
 sh ./examples/sentence-bert/repconc/9_run_jpq_train.sh 64
 
 # Evaluation
-sh ./examples/sentence-bert/repconc/10_run_jpq_eval.sh 64
+sh ./examples/sentence-bert/repconc/10_run_jpq_eval.sh 1 64
 
 # For example, here is the performance on MS MARCO dev set.
 more data/sbert-marco-passage/subvector-64/repconc/query_encoder_results/dev/metric.json 

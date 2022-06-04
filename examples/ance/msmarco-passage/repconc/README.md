@@ -39,7 +39,7 @@ more ../../data/ance-marco-passage/subvector-48/repconc/encoder_output/dev/metri
 sh ./msmarco-passage/repconc/9_run_jpq_train.sh 48
 
 # Evaluation
-sh ./msmarco-passage/repconc/10_run_jpq_eval.sh 48
+sh ./msmarco-passage/repconc/10_run_jpq_eval.sh 1 48
 
 # For example, here is the performance on MS MARCO dev set.
 more ../../data/ance-marco-passage/subvector-48/repconc/query_encoder_results/dev/metric.json 
