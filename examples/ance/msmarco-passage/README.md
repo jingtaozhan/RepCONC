@@ -4,14 +4,14 @@ This is the instructions about how to transfer [ANCE](https://openreview.net/pdf
 
 ## Retrieval Effectiveness
 
-Here is the effectiveness summarization about different compression methods. (Coming soon)
+Here is the effectiveness summarization about different compression methods. 
 
 | Models      | PQ Sub-vectors| Index Size  | Compression Ratio | MS MARCO Dev (MRR@10) | TREC 19 DL (NDCG@10) | TREC 20 DL (NDCG@10)
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| ANCE        | -  | 26 GB  | 1x  | 0. | 0. | 0. |
-| OPQ (Faiss) | 48 | 406 MB | 64x | 0. | 0. | 0. | 
-| JPQ         | 48 | 406 MB | 64x | 0. | 0. | 0. | 
-| RepCONC     | 48 | 406 MB | 64x | 0. | 0. | 0. | 
+| ANCE        | -  | 26 GB  | 1x  | 0.331 | 0.644 | 0.640 |
+| OPQ (Faiss) | 48 | 406 MB | 64x | 0.282 | 0.564 | 0.571 | 
+| JPQ         | 48 | 406 MB | 64x | 0.323 | 0.640 | 0.618 | 
+| RepCONC     | 48 | 406 MB | 64x | 0.338 | 0.659 | 0.641 | 
 
 ##  Directory Format
 
