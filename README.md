@@ -40,8 +40,8 @@ We provide examples about how to use RepCONC and JPQ to compress index for diffe
 * [Compressing index of Sentence BERT on MS MARCO Passage Ranking](./examples/sentence-bert) 
 * [Compressing index of coCondenser on MS MARCO Passage Ranking](./examples/cocondenser)
 * [Compressing index of TAS-Balanced on MS MARCO Passage Ranking](./examples/tas-balanced)
-* Compressing index of ADORE+STAR on MS MARCO Passage Ranking (Coming soon)
-* Compressing index of TCT-ColBERT on MS MARCO Passage Ranking (Coming soon)
+* [Compressing index of ANCE on MS MARCO Passage Ranking](./examples/ance/msmarco-passage)
+* [Compressing index of TCT-ColBERT-v2 on MS MARCO Passage Ranking](./examples/tct-colbert/msmarco-passage)
 
 
 ## Citation

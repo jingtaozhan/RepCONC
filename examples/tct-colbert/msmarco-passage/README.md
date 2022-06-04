@@ -1,14 +1,14 @@
-# Compressing TCT-ColBERT-V2 on MS MARCO Passage Ranking
+# Compressing TCT-ColBERT-v2 on MS MARCO Passage Ranking
 
 This is the instructions about how to transfer [TCT-ColBERT-V2](https://cs.uwaterloo.ca/~jimmylin/publications/Lin_etal_2021_RepL4NLP.pdf) into a memory-efficient dense retrieval model. 
 
 ## Retrieval Effectiveness
 
-Here is the effectiveness summarization about different compression methods.
+Here is the effectiveness summarization about different compression methods. (Coming soon)
 
 | Models      | PQ Sub-vectors| Index Size  | Compression Ratio | MS MARCO Dev (MRR@10) | TREC 19 DL (NDCG@10) | TREC 20 DL (NDCG@10)
 | -----------       | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| TCT-ColBERT-V2-hnp| -  | 26 GB  | 1x  | 0. | 0. | 0. |
+| TCT-ColBERT-v2-hnp| -  | 26 GB  | 1x  | 0. | 0. | 0. |
 | OPQ (Faiss)       | 48 | 406 MB | 64x | 0. | 0. | 0. | 
 | JPQ               | 48 | 406 MB | 64x | 0. | 0. | 0. | 
 | RepCONC           | 48 | 406 MB | 64x | 0. | 0. | 0. | 
@@ -21,11 +21,11 @@ The working directory is scheduled to be:
 ├── data/tct-colbert-v2-marco-passage
 │   ├── dataset (will be downloaded)
 │   ├── valid_dataset (will be generated)
-│   ├── dense_encoder (Path to save SBERT encoder)
-│   ├── dense_output (Path to save the output of SBERT)
+│   ├── dense_encoder (Path to save TCT-ColBERT-v2 encoder)
+│   ├── dense_output (Path to save the output of TCT-ColBERT-v2)
 │   ├── subvector-X (X is the number of sub-vectors)
-│   │   ├── warmup (OPQ Warmup of SBERT)
-│   │   ├── warmup_output (OPQ Output of SBERT warmup checkpoint)
+│   │   ├── warmup (OPQ Warmup of TCT-ColBERT-v2)
+│   │   ├── warmup_output (OPQ Output of TCT-ColBERT-v2 warmup checkpoint)
 │   │   ├── hardneg.json (hard negatives for repconc training)
 │   │   ├── jpq (training directory of jpq)
 │   │   ├── repconc (training directory of repconc)
@@ -38,7 +38,7 @@ The following is the training instructions about how to reproduce the above resu
 ### Common Procedure of OPQ/JPQ/RepCONC
 
 ```bash
-cd examples/ance
+cd examples/tct-colbert
 
 # Prepare MS MARCO dataset
 sh ./msmarco-passage/1_prepare_dataset.sh
@@ -54,7 +54,7 @@ sh ./msmarco-passage/4_gen_valid_set.sh
 ### Index Compression (and Joint Optimization)
 
 The passage representation will be quantized to several sub-vectors. Each sub-vector consumes $1$ byte because the default number of centroids per sub-vector is $256$. 
-That is to say, since TCT-ColBERT encodes passage to a vector of $768$ dimension ($768 \times 4$ bytes), if the number of sub-vectors is $48$ ($48$ bytes), the compression ratio is $768 \times 4/48 = 64$.
+That is to say, since TCT-ColBERT-v2 encodes passage to a vector of $768$ dimension ($768 \times 4$ bytes), if the number of sub-vectors is $48$ ($48$ bytes), the compression ratio is $768 \times 4/48 = 64$.
 
 Number of sub-vectors is an important hyper-parameter that directly corresponds to the effectiveness-efficiency tradeoff. More sub-vectors result in higher effectiveness but larger memory footprint (and slower retrieval). In this example, we set it to $64$ or $48$. Other value can also be explored as long as 768 is divisible by it.
 

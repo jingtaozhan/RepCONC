@@ -1,4 +1,4 @@
-# Compressing TCT-ColBERT-V2 on MS MARCO Passage Ranking
+# Compressing TCT-ColBERT-v2 on MS MARCO Passage Ranking
 
 Here, we assume you have already follow the [previous instructions](..). 
 

@@ -4,7 +4,7 @@ This is the instructions about how to transfer [ANCE](https://openreview.net/pdf
 
 ## Retrieval Effectiveness
 
-Here is the effectiveness summarization about different compression methods.
+Here is the effectiveness summarization about different compression methods. (Coming soon)
 
 | Models      | PQ Sub-vectors| Index Size  | Compression Ratio | MS MARCO Dev (MRR@10) | TREC 19 DL (NDCG@10) | TREC 20 DL (NDCG@10)
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
@@ -21,11 +21,11 @@ The working directory is scheduled to be:
 ├── data/ance-marco-passage
 │   ├── dataset (will be downloaded)
 │   ├── valid_dataset (will be generated)
-│   ├── dense_encoder (Path to save SBERT encoder)
-│   ├── dense_output (Path to save the output of SBERT)
+│   ├── dense_encoder (Path to save ANCE encoder)
+│   ├── dense_output (Path to save the output of ANCE)
 │   ├── subvector-X (X is the number of sub-vectors)
-│   │   ├── warmup (OPQ Warmup of SBERT)
-│   │   ├── warmup_output (OPQ Output of SBERT warmup checkpoint)
+│   │   ├── warmup (OPQ Warmup of ANCE)
+│   │   ├── warmup_output (OPQ Output of ANCE warmup checkpoint)
 │   │   ├── hardneg.json (hard negatives for repconc training)
 │   │   ├── jpq (training directory of jpq)
 │   │   ├── repconc (training directory of repconc)
