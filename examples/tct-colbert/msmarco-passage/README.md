@@ -8,10 +8,10 @@ Here is the effectiveness summarization about different compression methods. (Co
 
 | Models      | PQ Sub-vectors| Index Size  | Compression Ratio | MS MARCO Dev (MRR@10) | TREC 19 DL (NDCG@10) | TREC 20 DL (NDCG@10)
 | -----------       | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| TCT-ColBERT-v2-hnp| -  | 26 GB  | 1x  | 0. | 0. | 0. |
-| OPQ (Faiss)       | 48 | 406 MB | 64x | 0. | 0. | 0. | 
-| JPQ               | 48 | 406 MB | 64x | 0. | 0. | 0. | 
-| RepCONC           | 48 | 406 MB | 64x | 0. | 0. | 0. | 
+| TCT-ColBERT-v2-hnp| -  | 26 GB  | 1x  | 0.359 | 0.716 | 0.689 |
+| OPQ (Faiss)       | 48 | 406 MB | 64x | 0.301 | 0.605 | 0.608 | 
+| JPQ               | 48 | 406 MB | 64x | 0.329 | 0.681 | 0.663 | 
+| RepCONC           | 48 | 406 MB | 64x | 0.338 | 0.697 | 0.676 | 
 
 ##  Directory Format
 

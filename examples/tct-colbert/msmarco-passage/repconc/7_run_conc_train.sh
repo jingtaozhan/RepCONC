@@ -17,7 +17,7 @@ centroid_learning_rate=${4:-5e-4}
 learning_rate=${5:-2e-5}
 negative_per_query=${6:-11}
 full_batch_size=${7:-4096}
-num_train_epochs=${8:-6}
+num_train_epochs=${8:-4}
 
 per_device_train_batch_size=$(( $full_batch_size / $gpus ))
 
