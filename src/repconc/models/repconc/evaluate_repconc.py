@@ -148,7 +148,7 @@ def encode_corpus(corpus: Dict[Union[str, int], str], model: RepCONC, tokenizer,
         output_format="code",
         model=model,
         args = eval_args,
-        data_collator=get_collator_func(tokenizer, max_seq_length),
+        data_collator=get_collator_func(tokenizer, max_seq_length, input_text_type="doc"),
         tokenizer=tokenizer,
     ).predict(corpus_dataset)
     corpus_codes = corpus_out.predictions
@@ -169,7 +169,7 @@ def encode_query(queries: Dict[int, str], model: RepCONC, tokenizer,
         output_format="continuous_embedding",
         model=model,
         args=eval_args,
-        data_collator=get_collator_func(tokenizer, max_seq_length),
+        data_collator=get_collator_func(tokenizer, max_seq_length, input_text_type="query"),
         tokenizer=tokenizer,
     ).predict(query_dataset)
     query_embeds = query_out.predictions

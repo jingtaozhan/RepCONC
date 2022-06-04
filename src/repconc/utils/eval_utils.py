@@ -2,6 +2,7 @@ import logging
 import torch
 import json
 import csv
+import inspect
 import pytrec_eval
 from tqdm import tqdm
 from torch.utils.data import Dataset
@@ -110,11 +111,13 @@ class TextDataset(Dataset):
             return self.text_lst[item]
 
 
-def get_collator_func(tokenizer, max_length):
+def get_collator_func(tokenizer, max_length, input_text_type):
+    # To enable custom behavior of query tokenization and doc tokenization
+    input_text_type = {"input_text_type": input_text_type} if "input_text_type" in inspect.getfullargspec(tokenizer.__call__)[0] else {}
     def collator_fn(batch):
         if isinstance(batch[0], tuple):
             ids = torch.LongTensor([x[0] for x in batch])
-            features = tokenizer([x[1] for x in batch], padding=True, truncation=True, max_length=max_length)
+            features = tokenizer([x[1] for x in batch], padding=True, truncation=True, max_length=max_length, **input_text_type)
             return {
                 'input_ids': torch.LongTensor(features['input_ids']),
                 'attention_mask': torch.LongTensor(features['attention_mask']),
@@ -122,7 +125,7 @@ def get_collator_func(tokenizer, max_length):
             }
         else:
             assert isinstance(batch[0], str)
-            features = tokenizer(batch, padding=True, truncation=True, max_length=max_length)
+            features = tokenizer(batch, padding=True, truncation=True, max_length=max_length, **input_text_type)
             return {
                 'input_ids': torch.LongTensor(features['input_ids']),
                 'attention_mask': torch.LongTensor(features['attention_mask']),

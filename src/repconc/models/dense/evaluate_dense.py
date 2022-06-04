@@ -54,7 +54,7 @@ def encode_dense_corpus(corpus: Dict[Union[str, int], str], model: Union[BertDen
         doc_out = DenseEvaluater(
             model=model,
             args=eval_args,
-            data_collator=get_collator_func(tokenizer, max_seq_length),
+            data_collator=get_collator_func(tokenizer, max_seq_length, input_text_type="doc"),
             tokenizer=tokenizer,
         ).predict(doc_dataset)
         if is_main_process(eval_args.local_rank):
@@ -73,7 +73,7 @@ def encode_dense_query(queries: Dict[Union[str, int], str], model: Union[BertDen
     query_out = DenseEvaluater(
         model=model,
         args=eval_args,
-        data_collator=get_collator_func(tokenizer, max_seq_length),
+        data_collator=get_collator_func(tokenizer, max_seq_length, input_text_type="query"),
         tokenizer=tokenizer,
     ).predict(query_dataset)
     query_embeds = query_out.predictions

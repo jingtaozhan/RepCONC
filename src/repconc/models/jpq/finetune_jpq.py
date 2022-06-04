@@ -3,6 +3,7 @@ import faiss
 import logging
 import torch
 import random
+import inspect
 import numpy as np
 import torch.distributed as dist
 import faiss.contrib.torch_utils
@@ -54,6 +55,8 @@ class FinetuneQueryCollator:
     def __init__(self, tokenizer: PreTrainedTokenizer, max_query_len: int ):
         self.tokenizer = tokenizer
         self.max_query_len = max_query_len
+        # To enable custom behavior of query tokenization and doc tokenization
+        self.input_query_text_type = {"input_text_type": "query"} if "input_text_type" in inspect.getfullargspec(self.tokenizer.__call__)[0] else {}
 
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
         # tokenizing batch of text is much faster
@@ -65,7 +68,8 @@ class FinetuneQueryCollator:
             return_attention_mask=True,
             return_token_type_ids=False,
             truncation=True,
-            max_length=self.max_query_len
+            max_length=self.max_query_len,
+            **self.input_query_text_type
         )
         # we have to prevent inbatch false negatives when gathering tensors in the trainer
         # because each distributed process has its own collators

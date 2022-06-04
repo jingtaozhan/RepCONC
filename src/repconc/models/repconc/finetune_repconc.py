@@ -3,6 +3,7 @@ import json
 import logging
 import torch
 import random
+import inspect
 import numpy as np
 from tqdm import tqdm
 from torch import negative, nn, Tensor
@@ -63,9 +64,13 @@ class FinetuneCollator:
         self.tokenizer = tokenizer
         self.max_query_len = max_query_len
         self.max_doc_len = max_doc_len
+        # To enable custom behavior of query tokenization and doc tokenization
+        self.input_query_text_type = {"input_text_type": "query"} if "input_text_type" in inspect.getfullargspec(self.tokenizer.__call__)[0] else {}
+        self.input_doc_text_type = {"input_text_type": "doc"} if "input_text_type" in inspect.getfullargspec(self.tokenizer.__call__)[0] else {}
 
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
         # tokenizing batch of text is much faster
+        
         query_input = self.tokenizer(
             [x['query'] for x in features],
             padding=True,
@@ -74,7 +79,8 @@ class FinetuneCollator:
             return_attention_mask=True,
             return_token_type_ids=False,
             truncation=True,
-            max_length=self.max_query_len
+            max_length=self.max_query_len,
+            **self.input_query_text_type
         )
         pos_doc_input = self.tokenizer(
             [x['pos_doc'] for x in features],
@@ -84,7 +90,8 @@ class FinetuneCollator:
             return_attention_mask=True,
             return_token_type_ids=False,
             truncation=True,
-            max_length=self.max_doc_len
+            max_length=self.max_doc_len,
+            **self.input_doc_text_type
         )
         # we have to prevent inbatch false negatives when gathering tensors in the trainer
         # because each distributed process has its own collators
@@ -107,7 +114,8 @@ class FinetuneCollator:
                 return_attention_mask=True,
                 return_token_type_ids=False,
                 truncation=True,
-                max_length=self.max_doc_len
+                max_length=self.max_doc_len,
+                **self.input_doc_text_type
             )     
             neg_docids = torch.tensor(sum([x['neg_docids'] for x in features], []), dtype=torch.long)  
             batch_data.update({
