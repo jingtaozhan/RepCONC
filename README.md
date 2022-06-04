@@ -32,14 +32,17 @@ cd RepCONC
 pip install . --use-feature=in-tree-build # built in-place without first copying to a temporary directory.
 ```
 
+## How to use
 
-## Examples
+RepCONC is an ease-to-use toolbox for compressing the index of any dense retrieval models. It jointly optimizes the dense encoders and index so that high retrieval effectiveness is obtained even with a very compact index. The code separates the design of dense retrieval models and the joint optimization process, so it supports any dense retrieval model no matter whether it is built-in!
 
-We provide examples about how to use RepCONC and JPQ to compress index for different dense retrieval models. These examples are helpful if you want to use RepCONC/JPQ for your dense retrieval models.
-
+Here are several examples about how to use RepCONC to compress index for different dense retrieval models. These examples are helpful if you want to use RepCONC for your dense retrieval models.
+Since RepCONC has several [built-in dense retrieval models](src/repconc/models/dense/modeling_dense.py), it can be directly used to compress the index of many dense models without any code work. For example:
 * [Compressing index of Sentence BERT on MS MARCO Passage Ranking](./examples/sentence-bert) 
 * [Compressing index of coCondenser on MS MARCO Passage Ranking](./examples/cocondenser)
 * [Compressing index of TAS-Balanced on MS MARCO Passage Ranking](./examples/tas-balanced)
+
+Even if some dense retrieval models are not built-in, it is also very easy to apply RepCONC on them. Just make the api of model class and tokenizer consistent with the built-in ones and you are good to go. For example, ANCE and TCT-ColBERT-v2 have customized model definitions and tokenization. Here is how RepCONC compresses their indexes. 
 * [Compressing index of ANCE on MS MARCO Passage Ranking](./examples/ance/msmarco-passage)
 * [Compressing index of TCT-ColBERT-v2 on MS MARCO Passage Ranking](./examples/tct-colbert/msmarco-passage)
 
