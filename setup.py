@@ -16,9 +16,9 @@ setup(
     author='Jingtao Zhan',
     author_email='jingtaozhan@gmail.com',
     install_requires=[
-        'torch >= 1.10.1',
-        'transformers >= 4.19.2',
-        #'faiss-gpu == 1.7.1',#faiss should be installed manually
+        # 'torch >= 1.10.1', # install manually
+        'transformers >= 4.19.2', 
+        #'faiss-gpu == 1.7.1', # install manually
         'GradCache@git+https://github.com/luyug/GradCache#egg=GradCache'
     ],
 )

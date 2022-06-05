@@ -26,11 +26,13 @@ RepCONC also substantially boosts the second-stage ranking performance, as shown
 
 ## Installation
 
+Install RepCONC from our code: 
 ```bash
 git clone https://github.com/jingtaozhan/RepCONC
 cd RepCONC
 pip install . --use-feature=in-tree-build # built in-place without first copying to a temporary directory.
 ```
+Besides, two special dependencies should be installed manually: RepCONC depends on [PyTorch](https://pytorch.org/get-started/locally/) and [Faiss](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md), which require platform-specific custom configuration. They are not listed in the requirements and the installation is left to you. 
 
 ## How to use
 
