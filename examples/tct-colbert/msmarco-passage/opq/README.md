@@ -14,5 +14,10 @@ Here, we assume you have already follow the [previous instructions](..). Since t
 sh ./msmarco-passage/opq/6_run_opq_eval.sh 1 48
 # For example, here is the performance on MS MARCO dev set.
 more ../../data/tct-colbert-v2-marco-passage/subvector-48/warmup_output/dev/metric.json 
+
+# number of sub-vectors is set to 64.
+sh ./msmarco-passage/opq/6_run_opq_eval.sh 1 64
+# For example, here is the performance on MS MARCO dev set.
+more ../../data/tct-colbert-v2-marco-passage/subvector-64/warmup_output/dev/metric.json 
 ```
 

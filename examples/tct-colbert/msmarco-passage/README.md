@@ -1,6 +1,6 @@
 # Compressing TCT-ColBERT-v2 on MS MARCO Passage Ranking
 
-This is the instructions about how to transfer [TCT-ColBERT-V2](https://cs.uwaterloo.ca/~jimmylin/publications/Lin_etal_2021_RepL4NLP.pdf) into a memory-efficient dense retrieval model. 
+This is the instructions about how to transfer [TCT-ColBERT-v2](https://cs.uwaterloo.ca/~jimmylin/publications/Lin_etal_2021_RepL4NLP.pdf) into a memory-efficient dense retrieval model. 
 
 ## Retrieval Effectiveness
 
@@ -9,6 +9,9 @@ Here is the effectiveness summarization about different compression methods.
 | Models      | PQ Sub-vectors| Index Size  | Compression Ratio | MS MARCO Dev (MRR@10) | TREC 19 DL (NDCG@10) | TREC 20 DL (NDCG@10)
 | -----------       | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
 | TCT-ColBERT-v2-hnp| -  | 26 GB  | 1x  | 0.359 | 0.716 | 0.689 |
+| OPQ (Faiss)       | 64 | 541 MB | 48x | 0.321 | 0.652 | 0.636 | 
+| JPQ               | 64 | 541 MB | 48x | 0.341 | 0.677 | 0.680 | 
+| RepCONC           | 64 | 541 MB | 48x | 0.348 | 0.694 | 0.679 | 
 | OPQ (Faiss)       | 48 | 406 MB | 64x | 0.301 | 0.605 | 0.608 | 
 | JPQ               | 48 | 406 MB | 64x | 0.329 | 0.681 | 0.663 | 
 | RepCONC           | 48 | 406 MB | 64x | 0.338 | 0.697 | 0.676 | 
@@ -43,7 +46,7 @@ cd examples/tct-colbert
 # Prepare MS MARCO dataset
 sh ./msmarco-passage/1_prepare_dataset.sh
 
-# Let ANCE encode the corpus. We can know whether we reproduce right. And the corpus encoding can be reused by warmup process or JPQ training process.
+# Let TCT-ColBERT-v2 encode the corpus. We can know whether we reproduce right. And the corpus encoding can be reused by warmup process or JPQ training process.
 # For example, there are 8 gpus available.
 sh ./msmarco-passage/3_encode_dense_corpus.sh 8
 
@@ -60,6 +63,9 @@ Number of sub-vectors is an important hyper-parameter that directly corresponds 
 
 Warmup the centroids with OPQ. A good warmup accelerates convergence. 
 ```bash
+# You can set number of sub-vectors to 64. (48x compression ratio)
+sh ./msmarco-passage/5_opq_warmup.sh 64
+
 # You can also set number of sub-vectors to 48. (64x compression ratio)
 sh ./msmarco-passage/5_opq_warmup.sh 48
 ```

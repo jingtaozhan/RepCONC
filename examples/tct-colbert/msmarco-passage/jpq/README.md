@@ -11,6 +11,9 @@ JPQ further trains the query encoder and PQ Centroids.
 # JPQ uses 1 gpu for training. Multi-gpu does not provide additional training efficiency gains according to our experiments. 
 # number of sub-vectors is set to 48.
 sh ./msmarco-passage/jpq/6_run_jpq_train.sh 48
+
+# number of sub-vectors is set to 48.
+sh ./msmarco-passage/jpq/6_run_jpq_train.sh 64
 ```
 
 
@@ -27,4 +30,9 @@ JPQ re-encodes the queries. It loads the index of the warmup checkpoint and subs
 sh ./msmarco-passage/jpq/7_run_jpq_eval.sh 1 48
 # For example, here is the performance on MS MARCO dev set.
 more ../../data/tct-colbert-v2-marco-passage/subvector-48/jpq/query_results/dev/metric.json 
+
+# number of sub-vectors is set to 64. 
+sh ./msmarco-passage/jpq/7_run_jpq_eval.sh 1 48
+# For example, here is the performance on MS MARCO dev set.
+more ../../data/tct-colbert-v2-marco-passage/subvector-64/jpq/query_results/dev/metric.json 
 ```

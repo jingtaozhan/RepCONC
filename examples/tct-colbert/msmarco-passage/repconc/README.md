@@ -4,7 +4,7 @@ Here, we assume you have already follow the [previous instructions](..).
 
 RepCONC has two training stages. In the first stage, it trains the query encoder and passage encoder by minimizing ranking loss and quantization loss. In the second stage, it trains the query encoder and PQ centroids with only ranking loss. 
 
-The following instructions set the number of sub-vectors to $48$. You can also set it to other values.
+The following instructions set the number of sub-vectors to $48$ or $64$. You can also set it to other values.
 
 ### RepCONC Training STAGE-1
 
