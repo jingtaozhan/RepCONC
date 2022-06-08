@@ -36,7 +36,7 @@ Besides, two special dependencies should be installed manually: RepCONC depends 
 
 ## How to use
 
-RepCONC is an ease-to-use toolbox for compressing the index of any dense retrieval models. It jointly optimizes the dense encoders and index so that high retrieval effectiveness is obtained even with a very compact index. The code separates the design of dense retrieval models and the joint optimization process, so it supports any dense retrieval model no matter whether it is built-in!
+RepCONC is an easy-to-use toolbox for compressing the index of any dense retrieval models. It jointly optimizes the dense encoders and index so that high retrieval effectiveness is obtained even with a very compact index. The code separates the design of dense retrieval models and the joint optimization process, so it supports any dense retrieval model no matter whether it is built-in!
 
 Here are several examples about how to use RepCONC to compress index for different dense retrieval models. These examples are helpful if you want to use RepCONC for your dense retrieval models.
 Since RepCONC has several [built-in dense retrieval models](src/repconc/models/dense/modeling_dense.py), it can be directly used to compress the index of many dense models without any code work. For example:
