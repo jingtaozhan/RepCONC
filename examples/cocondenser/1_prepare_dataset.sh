@@ -28,17 +28,17 @@ else
 fi
 
 echo "start downloading data from MS, this may take some time depending on the network"
-wget -nc --no-check-certificate https://msmarco.blob.core.windows.net/msmarcoranking/collectionandqueries.tar.gz
+wget -nc --no-check-certificate https://msmarco.z22.web.core.windows.net/msmarcoranking/collectionandqueries.tar.gz
 tar --skip-old-files -zxvf collectionandqueries.tar.gz -C ./
 
 echo "start downloading queries and qrels"
 
-wget -nc --no-check-certificate https://msmarco.blob.core.windows.net/msmarcoranking/msmarco-test2019-queries.tsv.gz
+wget -nc --no-check-certificate https://msmarco.z22.web.core.windows.net/msmarcoranking/msmarco-test2019-queries.tsv.gz
 gunzip ./msmarco-test2019-queries.tsv.gz 
 
 wget -nc --no-check-certificate https://trec.nist.gov/data/deep/2019qrels-pass.txt
 
-wget -nc --no-check-certificate https://msmarco.blob.core.windows.net/msmarcoranking/msmarco-test2020-queries.tsv.gz
+wget -nc --no-check-certificate https://msmarco.z22.web.core.windows.net/msmarcoranking/msmarco-test2020-queries.tsv.gz
 gunzip ./msmarco-test2020-queries.tsv.gz 
 
 wget -nc --no-check-certificate https://trec.nist.gov/data/deep/2020qrels-pass.txt
